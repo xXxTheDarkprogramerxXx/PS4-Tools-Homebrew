@@ -1,0 +1,4 @@
+<linker>
+    <assembly fullname="PS4_Tools" preserve="all">
+    </assembly>
+</linker>
