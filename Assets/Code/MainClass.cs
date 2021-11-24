@@ -348,11 +348,12 @@ public class MainClass : MonoBehaviour
                         FreeUnjail(get_firmware());
                     }
 
-                    //now do freemount so we have full read write access 
-                    FreeMount();
-
 
                     FreeFTP(); //DO FTP NOW THANKS BYE
+
+
+                    //now do freemount so we have full read write access 
+                    FreeMount();
 
                     //try and FIND FTP 
 
@@ -1211,59 +1212,91 @@ public class MainClass : MonoBehaviour
 
     bool FTPAddress = false;
 
+    string OriginalTitle = "";
+
+    string OrginalBind = "";
+
     public void ModifyTrophyData()
     {
-        var trophyitem = lstTrophyFiles[CurrentItem];
-
-        string MetaDataLocation = "";
-        string NpBindLocation = "";
-
-        var _MetaInfo = trophyitem.AppInfo.Find(x => x.key == "TITLE_ID");
-        if (_MetaInfo != null)
+        try
         {
-            MetaDataLocation = "/system_data/priv/appmeta/" + _MetaInfo.val.TrimEnd() + @"/nptitle.dat";
-        }
-        if (Application.platform != RuntimePlatform.PS4)
-        {
-            MetaDataLocation = @"C:\Users\3de Echelon\Desktop\ps4\system_data\priv\appmeta\" + _MetaInfo.val.TrimEnd() + @"\nptitle.dat";
-        }
-        if (_MetaInfo != null)
-        {
-            NpBindLocation = "/system_data/priv/appmeta/" + _MetaInfo.val.TrimEnd() + @"/npbind.dat";
-        }
-        if (Application.platform != RuntimePlatform.PS4)
-        {
-            NpBindLocation = @"C:\Users\3de Echelon\Desktop\ps4\system_data\priv\appmeta\" + _MetaInfo.val.TrimEnd() + @"\npbind.dat";
-        }
+            var trophyitem = lstTrophyFiles[CurrentItem];
 
-        string AppLocation = "/system_data/priv/appmeta/XDPX20004/nptitle.dat";
-        if (Application.platform != RuntimePlatform.PS4)
-        {
-            AppLocation = @"C:\Users\3de Echelon\Desktop\ps4\system_data\priv\appmeta\XDPX20004\nptitle.dat";
+            string MetaDataLocation = "";
+            string NpBindLocation = "";
+
+            var _MetaInfo = trophyitem.AppInfo.Find(x => x.key == "TITLE_ID");
+            if (_MetaInfo != null)
+            {
+                MetaDataLocation = "/system_data/priv/appmeta/" + _MetaInfo.val.TrimEnd() + @"/nptitle.dat";
+            }
+            if (Application.platform != RuntimePlatform.PS4)
+            {
+                MetaDataLocation = @"C:\Users\3de Echelon\Desktop\ps4\system_data\priv\appmeta\" + _MetaInfo.val.TrimEnd() + @"\nptitle.dat";
+            }
+            if (_MetaInfo != null)
+            {
+                NpBindLocation = "/system_data/priv/appmeta/" + _MetaInfo.val.TrimEnd() + @"/npbind.dat";
+            }
+            if (Application.platform != RuntimePlatform.PS4)
+            {
+                NpBindLocation = @"C:\Users\3de Echelon\Desktop\ps4\system_data\priv\appmeta\" + _MetaInfo.val.TrimEnd() + @"\npbind.dat";
+            }
+
+            string AppLocation = "/system_data/priv/appmeta/XDPX20004/nptitle.dat";
+            if (Application.platform != RuntimePlatform.PS4)
+            {
+                AppLocation = @"C:\Users\3de Echelon\Desktop\ps4\system_data\priv\appmeta\XDPX20004\nptitle.dat";
+            }
+            //Quickly read the trophy Np id 
+            PKG.SceneRelated.NP_Title npdataholder = new PKG.SceneRelated.NP_Title();
+            npdataholder = new PS4_Tools.PKG.SceneRelated.NP_Title(MetaDataLocation);
+            var TrophyInfo = GameObject.Find("TrophyInfoBottom");
+            PKG.SceneRelated.NP_Bind npBind = new PKG.SceneRelated.NP_Bind();
+            if (File.Exists(NpBindLocation))
+            {
+                npBind = new PS4_Tools.PKG.SceneRelated.NP_Bind(NpBindLocation);
+            }
+
+            //FIRST COPY INFO
+            //fixing trophy info > just replace it in the console directory
+            OrginalBind = "/system_data/priv/appmeta/XDPX20004/npbind.dat.back";
+            File.Move("/system_data/priv/appmeta/XDPX20004/npbind.dat", "/system_data/priv/appmeta/XDPX20004/npbind.dat.back");
+            File.Copy(NpBindLocation, "/system_data/priv/appmeta/XDPX20004/npbind.dat", true);//replace this item
+
+
+            byte[] nptitle = File.ReadAllBytes(MetaDataLocation);
+            byte[] orginaltit = Encoding.UTF8.GetBytes(_MetaInfo.val.TrimEnd() + "_00");
+            byte[] newtit = Encoding.UTF8.GetBytes("XDPX20004_00");
+            nptitle = Assets.Code.StringExtensions.ReplaceBytes(nptitle,
+            orginaltit,
+            newtit);
+            OriginalTitle = AppLocation + ".back";
+            //SendMessageToPS4(_MetaInfo.val.TrimEnd());
+            File.Move(AppLocation, AppLocation + ".back");
+            File.WriteAllBytes(AppLocation, nptitle);//we now have the right item
+
+
+            if (Application.platform == RuntimePlatform.PS4)
+            {
+                try
+                {
+                    //we need to create the context and register it here
+                    Assets.Code.Wrapper.TrophyUtil.CreateAndRegister();
+
+                    Assets.Code.LoadingDialog.Close();
+                }
+                catch (Exception ex)
+                {
+                    Assets.Code.MessageBox.Show(ex.Message);
+                }
+            }
+
         }
-        //Quickly read the trophy Np id 
-        PKG.SceneRelated.NP_Title npdataholder = new PKG.SceneRelated.NP_Title();
-        npdataholder = new PS4_Tools.PKG.SceneRelated.NP_Title(MetaDataLocation);
-        var TrophyInfo = GameObject.Find("TrophyInfoBottom");
-        PKG.SceneRelated.NP_Bind npBind = new PKG.SceneRelated.NP_Bind();
-        if (File.Exists(NpBindLocation))
+        catch (Exception ex)
         {
-            npBind = new PS4_Tools.PKG.SceneRelated.NP_Bind(NpBindLocation);
+            Assets.Code.MessageBox.Show(ex.Message + "\n" + ex.StackTrace);
         }
-
-        //FIRST COPY INFO
-        //fixing trophy info > just replace it in the console directory
-        File.Copy(NpBindLocation, "/system_data/priv/appmeta/XDPX20004/npbind.dat", true);//replace this item
-
-
-        byte[] nptitle = File.ReadAllBytes(MetaDataLocation);
-        byte[] orginaltit = Encoding.UTF8.GetBytes(_MetaInfo.val.TrimEnd() + "_00");
-        byte[] newtit = Encoding.UTF8.GetBytes("XDPX20004_00");
-        nptitle = Assets.Code.StringExtensions.ReplaceBytes(nptitle,
-        orginaltit,
-        newtit);
-
-        File.WriteAllBytes(AppLocation, nptitle);//we now have the right item
     }
 
 
@@ -1843,20 +1876,7 @@ public class MainClass : MonoBehaviour
                             Assets.Code.LoadingDialog.Show("Mount and Modifing Trophy Info...");
                         }
                         ModifyTrophyData();
-                        if (Application.platform == RuntimePlatform.PS4)
-                        {
-                            try
-                            {
-                                //we need to create the context and register it here
-                                Assets.Code.Wrapper.TrophyUtil.CreateAndRegister();
 
-                                Assets.Code.LoadingDialog.Close();
-                            }
-                            catch (Exception ex)
-                            {
-                                Assets.Code.MessageBox.Show(ex.Message);
-                            }
-                        }
 
                         ////check the dir info as well
                         //string path = DirFiles[CurrentItem];
@@ -2017,9 +2037,13 @@ public class MainClass : MonoBehaviour
 
                     if (Application.platform == RuntimePlatform.PS4)
                     {
-                        SendMessageToPS4("Trying to terminate handle");
                         //if you don't do this you will cause a kpanic
                         Assets.Code.Wrapper.TrophyUtil.DestroyAndTerminate();
+                        //replace orginal np files
+                        File.Delete("/system_data/priv/appmeta/XDPX20004/npbind.dat");
+                        File.Delete("/system_data/priv/appmeta/XDPX20004/nptitle.dat");
+                        File.Move("/system_data/priv/appmeta/XDPX20004/npbind.dat.back", "/system_data/priv/appmeta/XDPX20004/npbind.dat");
+                        File.Move("/system_data/priv/appmeta/XDPX20004/nptitle.dat.back", "/system_data/priv/appmeta/XDPX20004/nptitle.dat");
                     }
                     CurrentSCreen = GameScreen.TrophyScreen;
                     return;
@@ -3518,7 +3542,7 @@ and many many more
         }
         catch (Exception ex)
         {
-            txtError.text = ex.Message;
+            txtError.text = ex.Message + "\n" + ex.StackTrace;
         }
     }
 

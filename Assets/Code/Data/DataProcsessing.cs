@@ -324,7 +324,26 @@ Order by title_id";
 
 
 
-                string SQL = @"SELECT * FROM tbl_trophy_title";
+
+                string SQLLookup = "PRAGMA table_info(tbl_trophy_title);";
+                var dt = SqlHelper.GetDataTable(SQLLookup, cs);
+                string ColNames = "";
+                for (int i = 0; i < dt.Rows.Count; i++)
+                {
+                    if (dt.Rows[i]["type"].ToString() == "")
+                    {
+                        ColNames += "cast(" + dt.Rows[i]["name"].ToString() + " as TEXT) '" + dt.Rows[i]["name"].ToString() + "', ";
+                    }
+                    else
+                    {
+                        ColNames += dt.Rows[i]["name"].ToString() + " , ";
+                    }
+
+                }
+                ColNames = ColNames.Remove(ColNames.Length - 2, 2);//remove last ,
+
+
+                string SQL = @"SELECT "+ ColNames + " FROM tbl_trophy_title";
 
                 var DataTable = SqlHelper.GetDataTable(SQL, cs);
                 for (int i = 0; i < DataTable.Rows.Count; i++)
@@ -400,9 +419,25 @@ Order by title_id";
                 if (!File.Exists(TrophyDBLocation))
                     throw new Exception("Could not load db");
 
+                string SQLLookup = "PRAGMA table_info(tbl_trophy_title);";
+                var dt = SqlHelper.GetDataTable(SQLLookup, cs);
+                string ColNames = "";
+                for (int i = 0; i < dt.Rows.Count; i++)
+                {
+                    if (dt.Rows[i]["type"].ToString() == "")
+                    {
+                        ColNames += "cast(" + dt.Rows[i]["name"].ToString() + " as TEXT) '" + dt.Rows[i]["name"].ToString() + "', ";
+                    }
+                    else
+                    {
+                        ColNames += dt.Rows[i]["name"].ToString() + " , ";
+                    }
+
+                }
+                ColNames = ColNames.Remove(ColNames.Length - 2, 2);//remove last ,
 
 
-                string SQL = @"SELECT * FROM tbl_trophy_title
+                string SQL = @"SELECT "+ ColNames + @"FROM tbl_trophy_title
 Where trophy_title_id = '" + trophy_title_id + "'";
 
                 var DataTable = SqlHelper.GetDataTable(SQL, cs);
@@ -485,7 +520,25 @@ Where trophy_title_id = '" + trophy_title_id + "'";
                 //SQL += "'";
                 //string tmp = trophy_title_id.Replace("_00", "");
                 string tmp = string.Copy(trophy_title_id.Replace("_00", ""));
-                string SQL = @"SELECT * FROM tbl_trophy_flag";
+
+                string SQLLookup = "PRAGMA table_info(tbl_trophy_flag);";
+                var dt = SqlHelper.GetDataTable(SQLLookup, cs);
+                string ColNames = "";
+                for (int i = 0; i < dt.Rows.Count; i++)
+                {
+                    if (dt.Rows[i]["type"].ToString() == "")
+                    {
+                        ColNames += "cast(" + dt.Rows[i]["name"].ToString() + " as TEXT) '" + dt.Rows[i]["name"].ToString() + "', ";
+                    }
+                    else
+                    {
+                        ColNames += dt.Rows[i]["name"].ToString() + " , ";
+                    }
+
+                }
+                ColNames = ColNames.Remove(ColNames.Length - 2, 2);//remove last ,
+
+                string SQL = @"SELECT "+ ColNames + @" FROM tbl_trophy_flag";
                 //where trophy_title_id = '" + tmp + @"'";
                 //SQL = string.Concat(SQL, "\n'");
                 var DataTable = SqlHelper.GetDataTable(SQL, cs);
