@@ -33,4 +33,31 @@ namespace Assets.Code.Wrapper
         public static extern int ShowLoadingDialog(string Message);
 
     }
+
+
+    public class TrophyUtil
+    {
+        /// <summary>
+        /// Use this to create and register a trophy's context
+        /// This can only be done once per game do not do it more than that
+        /// </summary>
+        /// <returns>true or false</returns>
+        [DllImport("universal")]
+        public static extern bool CreateAndRegister();
+
+        /// <summary>
+        /// This needs to be called each time a trophy has been reistered else the console will panic on app exit
+        /// </summary>
+        /// <returns></returns>
+        [DllImport("universal")]
+        public static extern bool DestroyAndTerminate();
+
+        /// <summary>
+        /// Unlockes a spesific trophy per context and trophy Id
+        /// </summary>
+        /// <param name="trophyId">The trophy's ID</param>
+        /// <returns></returns>
+        [DllImport("universal")]
+        public static extern bool UnlockSpesificTrophy(int trophyId);
+    }
 }

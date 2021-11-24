@@ -55,17 +55,22 @@ namespace Assets.Code.Data
 
         }
 
-        public static DataTable GetDataTable(string sqlqry, string constr)
+        public static DataTable GetDataTable(string sqlqry, string constr, DataTable DT = null)
         {
             try
             {
                 SetupConnection(constr);
 
                 DA = new SQLiteDataAdapter(sqlqry, con);
+                DA.ReturnProviderSpecificTypes = true;
                 DA.SelectCommand.CommandTimeout = 800;//800;
                 DA.SelectCommand.Parameters.Clear();
-                //DA.SelectCommand.Parameters.AddRange(_param);
-                DT = new DataTable();
+                if (DT == null)
+                {
+                    //DA.SelectCommand.Parameters.AddRange(_param);
+                    DT = new DataTable();
+                }
+
 
                 try
                 {
@@ -80,7 +85,7 @@ namespace Assets.Code.Data
                 con.Close();
                 return DT;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 throw ex;
             }

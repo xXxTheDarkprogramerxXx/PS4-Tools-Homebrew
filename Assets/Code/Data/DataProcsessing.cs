@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using UnityEngine;
 
@@ -24,7 +25,7 @@ namespace Assets.Code.Data
 
 
                 List<Models.AppInfo> dbInfo = new List<Models.AppInfo>();
-                string cs = string.Format("Version=3;UseUTF16Encoding=True;uri=file:{0}", AppInfoDBLocation);//sony is format 3
+                string cs = string.Format("Version=3;uri=file:{0}", AppInfoDBLocation);//sony is format 3
                 if (!File.Exists(AppInfoDBLocation))
                     throw new Exception("Could not load db");
 
@@ -46,9 +47,9 @@ namespace Assets.Code.Data
                 return dbInfo;
             }
 
-         
 
-            public static List<Models.AppBrowse> GetAllApps(string UserID, bool OnlyVisible = true)
+
+            public static List<Models.AppBrowse> GetAllApps(string UserID, bool OnlyVisible = false, bool ExcludeFolders = true)
             {
                 if (Application.platform != RuntimePlatform.PS4)
                 {
@@ -62,9 +63,14 @@ namespace Assets.Code.Data
                 if (!File.Exists(AppInfoDBLocation))
                     throw new Exception("Could not load db");
 
-                string SQL = @"SELECT * FROM tbl_appbrowse_0" + UserID + @" Where visible = " + Convert.ToInt32(OnlyVisible) + @"
+                string SQL = @"SELECT * FROM tbl_appbrowse_0" + UserID + @" Where visible = " + Convert.ToInt32(OnlyVisible) + @" and folderType = " + Convert.ToInt32(!ExcludeFolders) + @"
   and contentId is not null";
 
+                if (OnlyVisible == false)
+                {
+                    SQL = @"SELECT * FROM tbl_appbrowse_0" + UserID + @" Where folderType = " + Convert.ToInt32(!ExcludeFolders) + @"
+  and contentId is not null and contentSize > 0";
+                }
 
                 System.Data.DataTable dtTemp = SqlHelper.GetDataTable(SQL, cs);
                 for (int i = 0; i < dtTemp.Rows.Count; i++)
@@ -152,6 +158,9 @@ namespace Assets.Code.Data
                 {
                     //this is windows
                     SaveDataoDBLocation = @"C:\Users\3de Echelon\Desktop\ps4\Saves\savedata.db";
+
+                    //testing MWF
+                    SaveDataoDBLocation = @"C:\Users\3de Echelon\Downloads\savedata.db";
                 }
                 else
                 {
@@ -174,7 +183,7 @@ namespace Assets.Code.Data
 
                 long.TryParse(val.ToString(), out rtnval);
 
-                if(rtnval != 0)
+                if (rtnval != 0)
                 {
                     rtnval = rtnval * 1024;
                 }
@@ -188,6 +197,8 @@ namespace Assets.Code.Data
                 if (Application.platform != RuntimePlatform.PS4)
                 {
                     SaveDataoDBLocation = @"C:\Users\3de Echelon\Desktop\ps4\Saves\savedata.db";
+
+                    SaveDataoDBLocation = @"C:\Users\3de Echelon\Downloads\savedata.db";
                 }
                 else
                 {
@@ -195,19 +206,65 @@ namespace Assets.Code.Data
                     int.TryParse(MainClass.Get_UserId(), out UserId);
                     string userDirectory = UserId.ToString("x");
 
-                    SaveDataoDBLocation = @"/system_data/savedata/" + userDirectory + "/db/user/savedata.db"; 
+                    SaveDataoDBLocation = @"/system_data/savedata/" + userDirectory + "/db/user/savedata.db";
                 }
 
                 string cs = string.Format("Version=3;uri=file:{0}", SaveDataoDBLocation);//sony is format 3
                 if (!File.Exists(SaveDataoDBLocation))
                     throw new Exception("Could not load db");
 
+                string SQLLookup = "PRAGMA table_info(savedata);";
+                var dt = SqlHelper.GetDataTable(SQLLookup, cs);
+                string ColNames = "";
+                for (int i = 0; i < dt.Rows.Count; i++)
+                {
+                    if (dt.Rows[i]["type"].ToString() == "")
+                    {
+                        ColNames += "cast(" + dt.Rows[i]["name"].ToString() + " as TEXT) '" + dt.Rows[i]["name"].ToString() + "', ";
+                    }
+                    else
+                    {
+                        ColNames += dt.Rows[i]["name"].ToString() + " , ";
+                    }
+
+                }
+                ColNames = ColNames.Remove(ColNames.Length - 2, 2);//remove last ,
 
 
-                string SQL = @"select * from savedata
+                string SQL = @"select " + ColNames + @" from savedata
 Order by title_id";
 
-                var DataTable = SqlHelper.GetDataTable(SQL, cs);
+
+                System.Data.DataTable DT = new System.Data.DataTable();
+                Models.SaveData item = new Models.SaveData();
+                Type type = item.GetType();
+
+                IList<PropertyInfo> props = new List<PropertyInfo>(type.GetProperties());
+
+                foreach (PropertyInfo prop in props)
+                {
+                    object propValue = prop.GetValue(item, null);
+
+                    //switch(prop.PropertyType.ToString())
+                    //{
+                    //    case "System.Int32":
+                    //        DT.Columns.Add(, typeof(string));
+                    //        break;
+                    //    default:
+                    //        break;
+                    //}
+
+                    // Do something with propValue
+
+                    //check what is propvalue
+                    //var holder = propValue.GetType();
+                    //this is cool
+                    DT.Columns.Add(prop.Name, prop.PropertyType);
+
+
+                }
+
+                var DataTable = SqlHelper.GetDataTable(SQL, cs, DT);
                 for (int i = 0; i < DataTable.Rows.Count; i++)
                 {
                     Models.SaveData saveitem = new Models.SaveData();
@@ -232,6 +289,232 @@ Order by title_id";
                     saveitem.user_id = DataTable.Rows[i].GetValue<string>("user_id");
                     saveitem.user_param = DataTable.Rows[i].GetValue<string>("user_param");
                     saves.Add(saveitem);
+                }
+
+                return saves;
+            }
+        }
+
+
+        public static class Trophy
+        {
+            //Location of TrophyDB
+            private static string TrophyDBLocation = @"/user/home/" + MainClass.Get_UserId() + "/trophy/db/trophy_local.db";
+
+            public static List<Models.Trophy_title> GetAllTrophies()
+            {
+                List<Models.Trophy_title> saves = new List<Models.Trophy_title>();
+
+                if (Application.platform != RuntimePlatform.PS4)
+                {
+                    TrophyDBLocation = @"C:\Publish\Sony\trophy_local.db";
+                }
+                else
+                {
+                    int UserId = 0;
+                    int.TryParse(MainClass.Get_UserId(), out UserId);
+                    string userDirectory = UserId.ToString("x");
+
+                    TrophyDBLocation = @"/user/home/" + userDirectory + "/trophy/db/trophy_local.db";
+                }
+
+                string cs = string.Format("Version=3;uri=file:{0}", TrophyDBLocation);//sony is format 3
+                if (!File.Exists(TrophyDBLocation))
+                    throw new Exception("Could not load db");
+
+
+
+                string SQL = @"SELECT * FROM tbl_trophy_title";
+
+                var DataTable = SqlHelper.GetDataTable(SQL, cs);
+                for (int i = 0; i < DataTable.Rows.Count; i++)
+                {
+                    Models.Trophy_title saveitem = new Models.Trophy_title();
+                    saveitem.bronze_num = DataTable.Rows[i].GetValue<string>("bronze_num");
+                    saveitem.bronze_set = DataTable.Rows[i].GetValue<string>("bronze_set");
+                    saveitem.conf_file_revision = DataTable.Rows[i].GetValue<string>("conf_file_revision");
+                    saveitem.data_file_revision = DataTable.Rows[i].GetValue<string>("data_file_revision");
+                    saveitem.description = DataTable.Rows[i].GetValue<string>("description");
+                    saveitem.gold_set = DataTable.Rows[i].GetValue<string>("gold_set");
+                    saveitem.group_num = DataTable.Rows[i].GetValue<string>("group_num");
+                    saveitem.group_set = DataTable.Rows[i].GetValue<string>("group_set");
+                    saveitem.icon_location = DataTable.Rows[i].GetValue<string>("icon_location");
+                    saveitem.id = DataTable.Rows[i].GetValue<string>("id");
+                    saveitem.instsrc_attr = DataTable.Rows[i].GetValue<string>("instsrc_attr");
+                    saveitem.instsrc_digest = DataTable.Rows[i].GetValue<string>("instsrc_digest");
+                    saveitem.instsrc_type = DataTable.Rows[i].GetValue<string>("instsrc_type");
+                    saveitem.net_trans_file_revision = DataTable.Rows[i].GetValue<string>("net_trans_file_revision");
+                    saveitem.platform = DataTable.Rows[i].GetValue<string>("platform");
+                    saveitem.platinum_num = DataTable.Rows[i].GetValue<string>("platinum_num");
+                    saveitem.platinum_set = DataTable.Rows[i].GetValue<string>("platinum_set");
+                    saveitem.progress = DataTable.Rows[i].GetValue<string>("progress");
+                    saveitem.revision = DataTable.Rows[i].GetValue<string>("revision");
+                    saveitem.silver_num = DataTable.Rows[i].GetValue<string>("silver_num");
+                    saveitem.silver_set = DataTable.Rows[i].GetValue<string>("silver_set");
+                    saveitem.status = DataTable.Rows[i].GetValue<string>("status");
+                    saveitem.sync_pending_num = DataTable.Rows[i].GetValue<string>("sync_pending_num");
+                    saveitem.sync_req_num = DataTable.Rows[i].GetValue<string>("sync_req_num");
+                    saveitem.time_last_synced = DataTable.Rows[i].GetValue<string>("time_last_synced");
+                    saveitem.time_last_unlocked = DataTable.Rows[i].GetValue<string>("time_last_unlocked");
+                    saveitem.time_last_update = DataTable.Rows[i].GetValue<string>("time_last_update");
+                    saveitem.time_last_update_uc = DataTable.Rows[i].GetValue<string>("time_last_update_uc");
+                    saveitem.title = DataTable.Rows[i].GetValue<string>("title");
+                    saveitem.trophies_conf_file_revision = DataTable.Rows[i].GetValue<string>("trophies_conf_file_revision");
+                    saveitem.trophies_data_file_revision = DataTable.Rows[i].GetValue<string>("trophies_data_file_revision");
+                    saveitem.trophies_net_trans_file_revision = DataTable.Rows[i].GetValue<string>("trophies_net_trans_file_revision");
+                    saveitem.trophies_trop_info_revision = DataTable.Rows[i].GetValue<string>("trophies_trop_info_revision");
+                    saveitem.trophy_num = DataTable.Rows[i].GetValue<string>("trophy_num");
+                    saveitem.trophy_set_version = DataTable.Rows[i].GetValue<string>("trophy_set_version");
+                    saveitem.trophy_title_id = DataTable.Rows[i].GetValue<string>("trophy_title_id");
+                    saveitem.trop_info_revision = DataTable.Rows[i].GetValue<string>("trop_info_revision");
+                    saveitem.unlocked_bronze_num = DataTable.Rows[i].GetValue<string>("unlocked_bronze_num");
+                    saveitem.unlocked_gold_num = DataTable.Rows[i].GetValue<string>("unlocked_gold_num");
+                    saveitem.unlocked_platinum_num = DataTable.Rows[i].GetValue<string>("unlocked_platinum_num");
+                    saveitem.unlocked_silver_num = DataTable.Rows[i].GetValue<string>("unlocked_silver_num");
+                    saveitem.unlocked_trophy_num = DataTable.Rows[i].GetValue<string>("unlocked_trophy_num");
+                    saveitem.user_id = DataTable.Rows[i].GetValue<string>("user_id");
+                    saves.Add(saveitem);
+                }
+
+                return saves;
+            }
+
+            public static Models.Trophy_title GetSpesificTrophy(string trophy_title_id)
+            {
+                Models.Trophy_title saves = new Models.Trophy_title();
+
+                if (Application.platform != RuntimePlatform.PS4)
+                {
+                    TrophyDBLocation = @"C:\Publish\Sony\trophy_local.db";
+                }
+                else
+                {
+                    int UserId = 0;
+                    int.TryParse(MainClass.Get_UserId(), out UserId);
+                    string userDirectory = UserId.ToString("x");
+
+                    TrophyDBLocation = @"/user/home/" + userDirectory + "/trophy/db/trophy_local.db";
+                }
+
+                string cs = string.Format("Version=3;uri=file:{0}", TrophyDBLocation);//sony is format 3
+                if (!File.Exists(TrophyDBLocation))
+                    throw new Exception("Could not load db");
+
+
+
+                string SQL = @"SELECT * FROM tbl_trophy_title
+Where trophy_title_id = '" + trophy_title_id + "'";
+
+                var DataTable = SqlHelper.GetDataTable(SQL, cs);
+                //for (int i = 0; i < DataTable.Rows.Count; i++)
+                {
+                    Models.Trophy_title saveitem = new Models.Trophy_title();
+                    saveitem.bronze_num = DataTable.Rows[0].GetValue<string>("bronze_num");
+                    saveitem.bronze_set = DataTable.Rows[0].GetValue<string>("bronze_set");
+                    saveitem.conf_file_revision = DataTable.Rows[0].GetValue<string>("conf_file_revision");
+                    saveitem.data_file_revision = DataTable.Rows[0].GetValue<string>("data_file_revision");
+                    saveitem.description = DataTable.Rows[0].GetValue<string>("description");
+                    saveitem.gold_set = DataTable.Rows[0].GetValue<string>("gold_set");
+                    saveitem.group_num = DataTable.Rows[0].GetValue<string>("group_num");
+                    saveitem.group_set = DataTable.Rows[0].GetValue<string>("group_set");
+                    saveitem.icon_location = DataTable.Rows[0].GetValue<string>("icon_location");
+                    saveitem.id = DataTable.Rows[0].GetValue<string>("id");
+                    saveitem.instsrc_attr = DataTable.Rows[0].GetValue<string>("instsrc_attr");
+                    saveitem.instsrc_digest = DataTable.Rows[0].GetValue<string>("instsrc_digest");
+                    saveitem.instsrc_type = DataTable.Rows[0].GetValue<string>("instsrc_type");
+                    saveitem.net_trans_file_revision = DataTable.Rows[0].GetValue<string>("net_trans_file_revision");
+                    saveitem.platform = DataTable.Rows[0].GetValue<string>("platform");
+                    saveitem.platinum_num = DataTable.Rows[0].GetValue<string>("platinum_num");
+                    saveitem.platinum_set = DataTable.Rows[0].GetValue<string>("platinum_set");
+                    saveitem.progress = DataTable.Rows[0].GetValue<string>("progress");
+                    saveitem.revision = DataTable.Rows[0].GetValue<string>("revision");
+                    saveitem.silver_num = DataTable.Rows[0].GetValue<string>("silver_num");
+                    saveitem.silver_set = DataTable.Rows[0].GetValue<string>("silver_set");
+                    saveitem.status = DataTable.Rows[0].GetValue<string>("status");
+                    saveitem.sync_pending_num = DataTable.Rows[0].GetValue<string>("sync_pending_num");
+                    saveitem.sync_req_num = DataTable.Rows[0].GetValue<string>("sync_req_num");
+                    saveitem.time_last_synced = DataTable.Rows[0].GetValue<string>("time_last_synced");
+                    saveitem.time_last_unlocked = DataTable.Rows[0].GetValue<string>("time_last_unlocked");
+                    saveitem.time_last_update = DataTable.Rows[0].GetValue<string>("time_last_update");
+                    saveitem.time_last_update_uc = DataTable.Rows[0].GetValue<string>("time_last_update_uc");
+                    saveitem.title = DataTable.Rows[0].GetValue<string>("title");
+                    saveitem.trophies_conf_file_revision = DataTable.Rows[0].GetValue<string>("trophies_conf_file_revision");
+                    saveitem.trophies_data_file_revision = DataTable.Rows[0].GetValue<string>("trophies_data_file_revision");
+                    saveitem.trophies_net_trans_file_revision = DataTable.Rows[0].GetValue<string>("trophies_net_trans_file_revision");
+                    saveitem.trophies_trop_info_revision = DataTable.Rows[0].GetValue<string>("trophies_trop_info_revision");
+                    saveitem.trophy_num = DataTable.Rows[0].GetValue<string>("trophy_num");
+                    saveitem.trophy_set_version = DataTable.Rows[0].GetValue<string>("trophy_set_version");
+                    saveitem.trophy_title_id = DataTable.Rows[0].GetValue<string>("trophy_title_id");
+                    saveitem.trop_info_revision = DataTable.Rows[0].GetValue<string>("trop_info_revision");
+                    saveitem.unlocked_bronze_num = DataTable.Rows[0].GetValue<string>("unlocked_bronze_num");
+                    saveitem.unlocked_gold_num = DataTable.Rows[0].GetValue<string>("unlocked_gold_num");
+                    saveitem.unlocked_platinum_num = DataTable.Rows[0].GetValue<string>("unlocked_platinum_num");
+                    saveitem.unlocked_silver_num = DataTable.Rows[0].GetValue<string>("unlocked_silver_num");
+                    saveitem.unlocked_trophy_num = DataTable.Rows[0].GetValue<string>("unlocked_trophy_num");
+                    saveitem.user_id = DataTable.Rows[0].GetValue<string>("user_id");
+                    return saveitem;
+                }
+
+                return saves;
+            }
+
+            public static List<Models.Trophy_flag> GetAllTrophyFlags(string trophy_title_id)
+            {
+                List<Models.Trophy_flag> saves = new List<Models.Trophy_flag>();
+
+                if (Application.platform != RuntimePlatform.PS4)
+                {
+                    TrophyDBLocation = @"C:\Publish\Sony\trophy_local.db";
+                }
+                else
+                {
+                    int UserId = 0;
+                    int.TryParse(MainClass.Get_UserId(), out UserId);
+                    string userDirectory = UserId.ToString("x");
+
+                    TrophyDBLocation = @"/user/home/" + userDirectory + "/trophy/db/trophy_local.db";
+                }
+
+                string cs = string.Format("Version=3;uri=file:{0}", TrophyDBLocation);//sony is format 3
+                if (!File.Exists(TrophyDBLocation))
+                    throw new Exception("Could not load db");
+
+
+
+
+                //SQL += "'";
+                //string tmp = trophy_title_id.Replace("_00", "");
+                string tmp = string.Copy(trophy_title_id.Replace("_00", ""));
+                string SQL = @"SELECT * FROM tbl_trophy_flag";
+                //where trophy_title_id = '" + tmp + @"'";
+                //SQL = string.Concat(SQL, "\n'");
+                var DataTable = SqlHelper.GetDataTable(SQL, cs);
+                for (int i = 0; i < DataTable.Rows.Count; i++)
+                {
+                    try
+                    {
+                        Models.Trophy_flag tmpitem = new Models.Trophy_flag();
+                        tmpitem.description = DataTable.Rows[i].GetValue<string>("description");
+                        tmpitem.grade = DataTable.Rows[i].GetValue<string>("grade");
+                        tmpitem.groupid = DataTable.Rows[i].GetValue<string>("groupid");
+                        tmpitem.hidden = DataTable.Rows[i].GetValue<string>("hidden");
+                        tmpitem.id = DataTable.Rows[i].GetValue<string>("id");
+                        tmpitem.revision = DataTable.Rows[i].GetValue<string>("revision");
+                        tmpitem.time_unlocked = DataTable.Rows[i].GetValue<string>("time_unlocked");
+                        tmpitem.time_unlocked_uc = DataTable.Rows[i].GetValue<string>("time_unlocked_uc");
+                        tmpitem.title = DataTable.Rows[i].GetValue<string>("title");
+                        tmpitem.title_id = DataTable.Rows[i].GetValue<string>("title_id");
+                        tmpitem.trophyid = DataTable.Rows[i].GetValue<string>("trophyid");
+                        tmpitem.trophy_title_id = DataTable.Rows[i].GetValue<string>("trophy_title_id");
+                        tmpitem.unlocked = DataTable.Rows[i].GetValue<string>("unlocked");
+                        tmpitem.unlock_attribute = DataTable.Rows[i].GetValue<string>("unlock_attribute");
+                        tmpitem.visible = DataTable.Rows[i].GetValue<string>("visible");
+                        saves.Add(tmpitem);
+                    }
+                    catch (Exception e)
+                    {
+
+                    }
                 }
 
                 return saves;

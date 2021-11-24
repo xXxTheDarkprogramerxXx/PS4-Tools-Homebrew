@@ -18,6 +18,7 @@ using Assets.Code.Data;
 public class MainClass : MonoBehaviour
 {
 
+
     #region << Universal PRX calls >>
     [DllImport("universal")]
     private static extern int FreeUnjail(int FWVersion);
@@ -37,6 +38,7 @@ public class MainClass : MonoBehaviour
     private static extern string KernelGetOpenPsId();
     [DllImport("universal")]
     private static extern int UnlockTrophies(string NPComID);
+
     [DllImport("universal")]
     [return: MarshalAs(UnmanagedType.LPStr)]
     private static extern string GetUsername();
@@ -138,6 +140,11 @@ public class MainClass : MonoBehaviour
     [DllImport("universal")]
     private static extern bool ShowSaveDataDialog();
 
+
+    [DllImport("universal")]
+    private static extern int MakeSymLink(string source, string destination);
+
+
     #endregion << Universal PRX >>
 
 
@@ -161,6 +168,7 @@ public class MainClass : MonoBehaviour
         SaveDataSelected,
         RecoveryTools,
         TrophyScreen,
+        TrophyInfoScreen,
         USBPKGMenu,
     }
 
@@ -229,9 +237,18 @@ public class MainClass : MonoBehaviour
     #region << Trophy Items >>
 
     public Canvas TrophyCanvas;
+    public Canvas TrophyInfoCanvas;
 
     public ScrollRect trophycrollRect;
     public RectTransform trophycontentPanel;
+
+
+    public UnityEngine.UI.Image TrophyIMage;
+    public Text TrophyTitle;
+    public Text TrophySize;
+    public Text TrophyContentID;
+    public Text TrophyStatus;
+    public Text TrophyOptionsList;
 
     #endregion << Trophy Items >>
 
@@ -278,6 +295,20 @@ public class MainClass : MonoBehaviour
         }
     }
 
+    public static string GetLocalIPAddress()
+    {
+        var host = Dns.GetHostEntry(Dns.GetHostName());
+        foreach (var ip in host.AddressList)
+        {
+            if (ip.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
+            {
+                return ip.ToString();
+            }
+        }
+        return "0.0.0.0";
+        //throw new Exception("No network adapters with an IPv4 address in the system!");
+    }
+
     // Use this for initialization
     void Start()
     {
@@ -312,6 +343,8 @@ public class MainClass : MonoBehaviour
                     //}
                     //catch
                     {
+                        //JailbreakMe();
+
                         FreeUnjail(get_firmware());
                     }
 
@@ -320,6 +353,10 @@ public class MainClass : MonoBehaviour
 
 
                     FreeFTP(); //DO FTP NOW THANKS BYE
+
+                    //try and FIND FTP 
+
+
                 }
                 catch (Exception ex)
                 {
@@ -332,8 +369,19 @@ public class MainClass : MonoBehaviour
             }
         }
 
-    }
+        //try
+        //{
+        //    var IPAddress = GameObject.Find("txtIP");
+        //    if (IPAddress != null)
+        //    {
+        //        IPAddress.gameObject.GetComponent<Text>().text = "IP :" + GetLocalIPAddress() + ":21";
+        //    }
+        //}
+        //catch (Exception ex)
+        //{
 
+        //}
+    }
     private AudioClip GetRandomClip()
     {
         int item = UnityEngine.Random.Range(0, clips.Length);
@@ -498,6 +546,19 @@ public class MainClass : MonoBehaviour
         }
     }
     List<Trophy_File> trplist = new List<Trophy_File>();
+    List<string> DirFiles = new List<string>();
+
+    public class CustomTrophyHolder
+    {
+        public string MetaInfo { get; set; }
+
+        public List<Assets.Code.Models.AppInfo> AppInfo = new List<Assets.Code.Models.AppInfo>();
+    }
+
+    List<CustomTrophyHolder> lstTrophyFiles = new List<CustomTrophyHolder>();
+
+
+
     void CreateTrophyView(List<string> TrpFiles = null, List<string> IniFiles = null)
     {
         TrpItemGameObjectList.Clear();
@@ -508,6 +569,7 @@ public class MainClass : MonoBehaviour
         {
             GameObject.Destroy(trophycontentPanel.GetChild(i).gameObject);
         }
+        DirFiles = TrpFiles;
         for (int i = 0; i < TrpFiles.Count; i++)
         {
 
@@ -612,6 +674,136 @@ public class MainClass : MonoBehaviour
         imgholder1.color = hexToColor("#9F9F9FFF");
         savescrollRect.verticalNormalizedPosition = 0;
         ScrollToTop(savescrollRect);
+    }
+
+
+    void CreateTrophyView(List<CustomTrophyHolder> MetaFiles = null)
+    {
+        try
+        {
+            TrpItemGameObjectList.Clear();
+            GameObject objetc = null;
+
+            int count = trophycontentPanel.transform.childCount;
+            for (int i = 0; i < count; i++)
+            {
+                GameObject.Destroy(trophycontentPanel.GetChild(i).gameObject);
+            }
+
+            for (int i = 0; i < MetaFiles.Count; i++)
+            {
+
+                try
+                {
+                    //we just want apps that include nptitle.dat
+
+                    string Name = new DirectoryInfo(MetaFiles[i].MetaInfo).Name;
+                    if (Name == "XDPX20004" || Name == "XDPX20002")
+                    {
+                        //we don't count
+                        continue;
+                    }
+
+                    //SendMessageToPS4(Name);
+                    string MetaDataLocation = MetaFiles[i].MetaInfo;
+                    //SendMessageToPS4("Getting App Info");
+                    MetaFiles[i].AppInfo = DataProcsessing.AppInfo.GetAppInfo(Name);
+                    //SendMessageToPS4("Got App Info");
+
+
+
+                    if (Application.platform != RuntimePlatform.PS4)
+                    {
+                        MetaDataLocation = MetaFiles[i].MetaInfo + @"\nptitle.dat";
+
+                    }
+                    else
+                    {
+                        //if (MetaFiles[i].AppInfo == null)
+                        //{
+                        //    SendMessageToPS4("App Info is blank");
+                        //}
+
+                        //ps4 app info holds meta info location
+                        MetaDataLocation = MetaFiles[i].MetaInfo + "/nptitle.dat";
+                    }
+                    ///system_data/priv/appmeta/
+                    if (!File.Exists(MetaDataLocation))
+                    {
+                        //SendMessageToPS4("MetaDataLocation does not exist");
+                        continue;
+                    }
+                    objetc = Instantiate(FileSaveFab, trophycontentPanel);
+
+
+                    Text textholder = objetc.GetComponentInChildren<Text>();
+
+                    //now get the cusa info 
+
+                    var ListOfStr = DataProcsessing.AppInfo.GetAppInfo(Name);
+
+
+                    var Title = ListOfStr.Find(x => x.key == "TITLE");
+                    if (Title != null)
+                    {
+                        textholder.text = Title.val.TrimEnd();
+                    }
+                    else
+                    {
+                        textholder.text = Name;
+                    }
+
+                    UnityEngine.UI.Image[] HolderforPic = objetc.GetComponentsInChildren<UnityEngine.UI.Image>();
+                    string IconPath = "";
+
+                    var _MetaInfoForImage = MetaFiles[i].AppInfo.Find(x => x.key == "_metadata_path");
+                    if (_MetaInfoForImage != null)
+                    {
+                        IconPath = _MetaInfoForImage.val.TrimEnd() + "/icon0.png";
+                    }
+
+                    if (Application.platform != RuntimePlatform.PS4)
+                    {
+                        IconPath = @"C:\Users\3de Echelon\Desktop\ps4\user\appmeta\" + Name + @"\icon0.png";
+                    }
+                    if (File.Exists(IconPath))
+                    {
+                        try
+                        {
+
+                            HolderforPic[1].sprite = LoadSprite(IconPath);
+                        }
+                        catch
+                        {
+                            //cant find the pic dont though a fit
+                        }
+                    }
+
+
+                    //HolderforPic.sprite =
+                    //objetc.transform.localScale = new Vector3 (1, 1, 1);
+                    objetc.transform.SetParent(trophycontentPanel);
+                    //objetc.transform.GetChild (0).gameObject.SetActive (true);
+                    UnityEngine.UI.Image imgholder = objetc.GetComponent<UnityEngine.UI.Image>();
+                    imgholder.color = Color.black;
+
+                    TrpItemGameObjectList.Add(objetc);
+                    lstTrophyFiles.Add(MetaFiles[i]);
+                }
+                catch (Exception ex)
+                {
+                    SendMessageToPS4(ex.Message);
+                }
+            }
+            UnityEngine.UI.Image imgholder1 = TrpItemGameObjectList[0].GetComponent<UnityEngine.UI.Image>();
+            imgholder1.color = hexToColor("#9F9F9FFF");
+            savescrollRect.verticalNormalizedPosition = 0;
+            ScrollToTop(savescrollRect);
+        }
+        catch (Exception ex)
+        {
+            Assets.Code.MessageBox.Show(ex.Message + ex.StackTrace);
+        }
     }
 
     void CreateSaveDataView(List<string> SaveDirs = null)
@@ -1017,6 +1209,65 @@ public class MainClass : MonoBehaviour
 
     bool playing_Snd0 = false;
 
+    bool FTPAddress = false;
+
+    public void ModifyTrophyData()
+    {
+        var trophyitem = lstTrophyFiles[CurrentItem];
+
+        string MetaDataLocation = "";
+        string NpBindLocation = "";
+
+        var _MetaInfo = trophyitem.AppInfo.Find(x => x.key == "TITLE_ID");
+        if (_MetaInfo != null)
+        {
+            MetaDataLocation = "/system_data/priv/appmeta/" + _MetaInfo.val.TrimEnd() + @"/nptitle.dat";
+        }
+        if (Application.platform != RuntimePlatform.PS4)
+        {
+            MetaDataLocation = @"C:\Users\3de Echelon\Desktop\ps4\system_data\priv\appmeta\" + _MetaInfo.val.TrimEnd() + @"\nptitle.dat";
+        }
+        if (_MetaInfo != null)
+        {
+            NpBindLocation = "/system_data/priv/appmeta/" + _MetaInfo.val.TrimEnd() + @"/npbind.dat";
+        }
+        if (Application.platform != RuntimePlatform.PS4)
+        {
+            NpBindLocation = @"C:\Users\3de Echelon\Desktop\ps4\system_data\priv\appmeta\" + _MetaInfo.val.TrimEnd() + @"\npbind.dat";
+        }
+
+        string AppLocation = "/system_data/priv/appmeta/XDPX20004/nptitle.dat";
+        if (Application.platform != RuntimePlatform.PS4)
+        {
+            AppLocation = @"C:\Users\3de Echelon\Desktop\ps4\system_data\priv\appmeta\XDPX20004\nptitle.dat";
+        }
+        //Quickly read the trophy Np id 
+        PKG.SceneRelated.NP_Title npdataholder = new PKG.SceneRelated.NP_Title();
+        npdataholder = new PS4_Tools.PKG.SceneRelated.NP_Title(MetaDataLocation);
+        var TrophyInfo = GameObject.Find("TrophyInfoBottom");
+        PKG.SceneRelated.NP_Bind npBind = new PKG.SceneRelated.NP_Bind();
+        if (File.Exists(NpBindLocation))
+        {
+            npBind = new PS4_Tools.PKG.SceneRelated.NP_Bind(NpBindLocation);
+        }
+
+        //FIRST COPY INFO
+        //fixing trophy info > just replace it in the console directory
+        File.Copy(NpBindLocation, "/system_data/priv/appmeta/XDPX20004/npbind.dat", true);//replace this item
+
+
+        byte[] nptitle = File.ReadAllBytes(MetaDataLocation);
+        byte[] orginaltit = Encoding.UTF8.GetBytes(_MetaInfo.val.TrimEnd() + "_00");
+        byte[] newtit = Encoding.UTF8.GetBytes("XDPX20004_00");
+        nptitle = Assets.Code.StringExtensions.ReplaceBytes(nptitle,
+        orginaltit,
+        newtit);
+
+        File.WriteAllBytes(AppLocation, nptitle);//we now have the right item
+    }
+
+
+
     // Update is called once per frame
     void Update()
     {
@@ -1026,6 +1277,22 @@ public class MainClass : MonoBehaviour
             if (Application.platform == RuntimePlatform.PS4)
             {
                 txtFirm.text = "Firmware :" + FirmHolder.ToString() + " / " + Temperature().ToString() + " ºC";
+                if (FTPAddress == false)
+                {
+                    try
+                    {
+                        var IPAddress = GameObject.Find("txtIP");
+                        if (IPAddress != null)
+                        {
+                            IPAddress.gameObject.GetComponent<Text>().text = "IP :" + GetLocalIPAddress() + ":21";
+                        }
+                        FTPAddress = true;
+                    }
+                    catch (Exception ex)
+                    {
+
+                    }
+                }
             }
             if (playing_Snd0 == false)
             {
@@ -1045,7 +1312,6 @@ public class MainClass : MonoBehaviour
                     audiosource.Play();
                 }
             }
-
             //should be cross
             if (Input.GetKeyDown(KeyCode.Joystick1Button0) || Input.GetKeyDown(KeyCode.Keypad2))
             {
@@ -1059,7 +1325,7 @@ public class MainClass : MonoBehaviour
                     //PS4_Tools.Trophy_File.Unlock_All_Title_Id("NPWR09395_00", "/user/home/" + userDirectory + "/trophy/db/trophy_local.db", "/user/home/"+ userDirectory + "/trophy/data/sce_trop/trpsummary.dat");
                     //Full Trophy Unlcoking 
                     PS4_Tools.Recovery.FixTrophySummary("/user/home/" + userDirectory + "/trophy/db/trophy_local.db", "/user/home/" + userDirectory + "/trophy/data/sce_trop/trpsummary.dat");
-                    SendMessageToPS4("Trophy summary fixed");
+                    Assets.Code.MessageBox.Show("Trophy summary fixed!");
 
                     return;
                 }
@@ -1067,13 +1333,6 @@ public class MainClass : MonoBehaviour
                 {
                     try
                     {
-                        //we will be testing some other functions
-
-                        //sony loads files like this
-
-
-
-
                         if (Application.platform == RuntimePlatform.PS4)
                         {
                             Assets.Code.LoadingDialog.Show("Loading all pkg's this might take some time");
@@ -1082,6 +1341,7 @@ public class MainClass : MonoBehaviour
                             try
                             {
                                 CurrentItem = 0;
+                                usbcontentPanel.gameObject.SetActive(false);
                                 MainMenu.gameObject.SetActive(false);//hide main menu
                                 PKGSelectionCanvas.gameObject.SetActive(true);//SHow PKG Screen
                                 CurrentSCreen = GameScreen.PKGScreen;
@@ -1120,7 +1380,7 @@ public class MainClass : MonoBehaviour
                             catch (Exception ex)
                             {
                                 Assets.Code.LoadingDialog.Close();
-                                Assets.Code.MessageBox.Show("Error process could not start " + ex.Message + "\n" + ex.Data + "\n" + ex.StackTrace);
+                                Assets.Code.MessageBox.Show("Error Loading PKG Files" + ex.Message + "\n" + ex.Data + "\n" + ex.StackTrace);
                                 //txtError.text = "Error process could not start " + ex.Message + "\n" + ex.Data + "\n" + ex.StackTrace;
                             }
                         }
@@ -1375,23 +1635,271 @@ public class MainClass : MonoBehaviour
                 {
                     try
                     {
-                        if (trplist[CurrentItem].trophyconf != null)
+                        CanvasSaveData.gameObject.SetActive(false);//hide PKG Screen
+                        SaveSelectionCanvas.gameObject.SetActive(false);//show pkg info
+                        PKGSelectionCanvas.gameObject.SetActive(false);//Hide Save Screen
+                        TrophyCanvas.gameObject.SetActive(false);
+                        TrophyInfoCanvas.gameObject.SetActive(true);
+                        CurrentSCreen = GameScreen.TrophyInfoScreen;
+
+
+                        if (Application.platform == RuntimePlatform.PS4)
                         {
-                            int UserId = 0;
-                            int.TryParse(GetUserId(), out UserId);
-                            string userDirectory = UserId.ToString("x");
-                            string nptitleid = trplist[CurrentItem].trophyconf.npcommid;
-                            if (!nptitleid.Contains("_00"))
-                            {
-                                nptitleid = nptitleid + "_00";
-                            }
-                            PS4_Tools.Trophy_File.Unlock_All_Title_Id(nptitleid, "/user/home/" + userDirectory + "/trophy/db/trophy_local.db", "/user/home/" + userDirectory + "/trophy/data/sce_trop/trpsummary.dat");
-                            SendMessageToPS4("Unlocked all for " + nptitleid + " via DB");
+                            Assets.Code.LoadingDialog.Show("Prepping Trophy For Mount and Modification");
                         }
+
+                        var trophyitem = lstTrophyFiles[CurrentItem];
+
+                        string MetaDataLocation = "";
+                        string NpBindLocation = "";
+
+                        if (Application.platform == RuntimePlatform.PS4)
+                        {
+                            Assets.Code.LoadingDialog.Close();
+                            Assets.Code.LoadingDialog.Show("Getting Trophy TITLE_ID");
+                        }
+                        var _MetaInfo = trophyitem.AppInfo.Find(x => x.key == "TITLE_ID");
+                        if (_MetaInfo != null)
+                        {
+                            MetaDataLocation = "/system_data/priv/appmeta/" + _MetaInfo.val.TrimEnd() + @"/nptitle.dat";
+                        }
+                        if (Application.platform == RuntimePlatform.PS4)
+                        {
+                            Assets.Code.LoadingDialog.Close();
+                            Assets.Code.LoadingDialog.Show("Mapping NP Info");
+                        }
+
+                        if (Application.platform != RuntimePlatform.PS4)
+                        {
+                            MetaDataLocation = @"C:\Users\3de Echelon\Desktop\ps4\system_data\priv\appmeta\" + _MetaInfo.val.TrimEnd() + @"\nptitle.dat";
+                        }
+                        if (_MetaInfo != null)
+                        {
+                            NpBindLocation = "/system_data/priv/appmeta/" + _MetaInfo.val.TrimEnd() + @"/npbind.dat";
+                        }
+                        if (Application.platform != RuntimePlatform.PS4)
+                        {
+                            NpBindLocation = @"C:\Users\3de Echelon\Desktop\ps4\system_data\priv\appmeta\" + _MetaInfo.val.TrimEnd() + @"\npbind.dat";
+                        }
+                        if (Application.platform == RuntimePlatform.PS4)
+                        {
+                            Assets.Code.LoadingDialog.Close();
+                            Assets.Code.LoadingDialog.Show("Reading NP Info");
+                        }
+                        //Quickly read the trophy Np id 
+                        PKG.SceneRelated.NP_Title npdataholder = new PKG.SceneRelated.NP_Title();
+                        npdataholder = new PS4_Tools.PKG.SceneRelated.NP_Title(MetaDataLocation);
+                        var TrophyInfo = GameObject.Find("TrophyInfoBottom");
+                        PKG.SceneRelated.NP_Bind npBind = new PKG.SceneRelated.NP_Bind();
+                        if (File.Exists(NpBindLocation))
+                        {
+                            npBind = new PS4_Tools.PKG.SceneRelated.NP_Bind(NpBindLocation);
+                        }
+                        else
+                        {
+                            //error out here
+                            Assets.Code.MessageBox.Show("npbind could not be found you wont be able to use this option");
+
+                        }
+                        //if (npdataholder != null)
+                        //{
+
+                        //    //TrophyInfo.gameObject.GetComponent<Text>().text = "NpTitle:" + npdataholder.Nptitle + "\nNpTitleSecret:" + System.Text.Encoding.ASCII.GetString(npdataholder.NpTitleSecret);
+                        //    //TrophyOptionsList.text = "NpTitle:" + npdataholder.Nptitle + "\nNpTitleSecret:" + System.Text.Encoding.ASCII.GetString(npdataholder.NpTitleSecret);
+                        //}
+                        //else
+                        //{
+                        //    TrophyInfo.gameObject.GetComponent<Text>().text = "Could not load info";
+                        //}
+                        if (Application.platform == RuntimePlatform.PS4)
+                        {
+                            Assets.Code.LoadingDialog.Close();
+                            Assets.Code.LoadingDialog.Show("Setting Meta Data...");
+                        }
+                        string IconPath = "";
+                        var imageinfo = trophyitem.AppInfo.Find(x => x.key == "_metadata_path");
+                        if (imageinfo != null)
+                        {
+                            IconPath = imageinfo.val.TrimEnd() + "/icon0.png";
+                        }
+
+                        if (Application.platform != RuntimePlatform.PS4)
+                        {
+                            IconPath = @"C:\Users\3de Echelon\Desktop\ps4\user\appmeta\" + _MetaInfo.val.TrimEnd() + @"\icon0.png";
+                        }
+
+                        if (File.Exists(IconPath))
+                        {
+                            //set the icon 
+
+                            var TrophyImage = GameObject.Find("TrophyImage");
+                            TrophyImage.gameObject.GetComponent<UnityEngine.UI.Image>().sprite = LoadSprite(IconPath);
+
+                        }
+
+                        var ddTrophyHolder = GameObject.Find("ddTrophy");
+
+                        Dropdown ddTrophy = ddTrophyHolder.gameObject.GetComponent<Dropdown>();
+
+                        ddTrophy.options.Clear();
+                        List<Dropdown.OptionData> options = new List<Dropdown.OptionData>();
+                        Dropdown.OptionData data = new Dropdown.OptionData();
+                        data.text = "All";
+                        options.Add(data);
+
+                        //we need to load all trophy info per trophy_title_id
+                        string NpTitle = npBind.Nptitle;
+                        if (Application.platform == RuntimePlatform.PS4)
+                        {
+                            Assets.Code.LoadingDialog.Close();
+                            Assets.Code.LoadingDialog.Show("Getting Trophy Info...");
+                        }
+                        var lstoftrp1 = DataProcsessing.Trophy.GetAllTrophyFlags(NpTitle.Trim());
+
+                        var lstoftrp = lstoftrp1.FindAll(x => x.trophy_title_id == NpTitle);
+
+                        for (int i = 0; i < lstoftrp.Count; i++)
+                        {
+                            string Grade = "";
+                            switch (lstoftrp[i].grade)
+                            {
+                                case "1":
+                                    Grade = "Platinum";
+                                    break;
+                                case "2":
+                                    Grade = "Gold";
+                                    break;
+                                case "3":
+                                    Grade = "Silver";
+                                    break;
+                                case "4":
+                                    Grade = "Bronze";
+                                    break;
+                                default:
+                                    Grade = "Unknown";
+                                    break;
+
+                            }
+
+                            data = new Dropdown.OptionData();
+                            data.text = "(" + lstoftrp[i].trophyid + ") " + lstoftrp[i].title + " | Grade : " + Grade;
+                            try
+                            {
+                                data.image = LoadSprite(IconPath);
+                            }
+                            catch
+                            {
+
+                            }
+                            options.Add(data);
+                        }
+
+
+
+
+                        ddTrophy.AddOptions(options);
+                        ddTrophy.onValueChanged.AddListener(delegate
+                        {
+                            DropdownValueChanged(ddTrophy);
+                        });
+
+                        Text TrophyInfoBottom = TrophyInfo.gameObject.GetComponent<Text>();
+                        TrophyInfoBottom.text = "All Selected";
+
+                        ddTrophy.value = 0;//got to the first item thanks 
+
+
+                        var TrophySealedKeyHolder = GameObject.Find("TrophySealedKey");
+                        if (TrophySealedKeyHolder != null)
+                        {
+                            Text TrophySealedKey = TrophySealedKeyHolder.gameObject.GetComponent<Text>();
+                            TrophySealedKey.text = "Secret : " + BitConverter.ToString(npdataholder.NpTitleSecret);
+                        }
+
+
+                        var TrophyTitleHolder = GameObject.Find("TrophyTitle");
+                        if (TrophyTitleHolder != null)
+                        {
+                            Text TrophyTitle = TrophyTitleHolder.gameObject.GetComponent<Text>();
+                            TrophyTitle.text = "Total Trophies :" + lstoftrp.Count;
+                        }
+
+                        var TrophySizeHolder = GameObject.Find("TrophySize");
+                        if (TrophySizeHolder != null)
+                        {
+                            Text TrophySize = TrophySizeHolder.gameObject.GetComponent<Text>();
+                            TrophySize.text = "Size : Unknown";
+                        }
+
+                        var TrophyContentIDHolder = GameObject.Find("TrophyContentID");
+                        if (TrophyContentIDHolder != null)
+                        {
+                            Text TrophyContentID = TrophyContentIDHolder.gameObject.GetComponent<Text>();
+                            TrophyContentID.text = "Title ID : " + _MetaInfo.val.TrimEnd() + "\tTrophy Title ID:" + NpTitle;
+                        }
+                        if (Application.platform == RuntimePlatform.PS4)
+                        {
+                            Assets.Code.LoadingDialog.Close();
+                            Assets.Code.LoadingDialog.Show("Mount and Modifing Trophy Info...");
+                        }
+                        ModifyTrophyData();
+                        if (Application.platform == RuntimePlatform.PS4)
+                        {
+                            try
+                            {
+                                //we need to create the context and register it here
+                                Assets.Code.Wrapper.TrophyUtil.CreateAndRegister();
+
+                                Assets.Code.LoadingDialog.Close();
+                            }
+                            catch (Exception ex)
+                            {
+                                Assets.Code.MessageBox.Show(ex.Message);
+                            }
+                        }
+
+                        ////check the dir info as well
+                        //string path = DirFiles[CurrentItem];
+                        //string DirInfo = Path.GetDirectoryName(path);
+                        //if (trplist[CurrentItem].trophyconf != null)
+                        //{
+
+                        //    int UserId = 0;
+
+                        //    if (Application.platform == RuntimePlatform.PS4)
+                        //    {
+                        //        int.TryParse(GetUserId(), out UserId);
+                        //    }
+
+                        //    string userDirectory = UserId.ToString("x");
+                        //    string nptitleid = trplist[CurrentItem].trophyconf.npcommid;
+                        //    if (!nptitleid.Contains("_00"))
+                        //    {
+                        //        nptitleid = nptitleid + "_00";
+                        //    }
+
+                        //    //Copy nptitle.dat to app
+                        //    //well thanks sony for being special
+
+                        //    string PathOfNpTitleId = "/system_data/priv/appmeta/" + trplist[CurrentItem].trophyconf.npcommid + "/nptitle.dat";
+                        //    string PathOfNpBind = "";
+                        //    if (File.Exists(""))
+                        //    {
+
+
+
+                        //        //int MakeSymLink
+                        //    }
+
+                        //PS4_Tools.Trophy_File.Unlock_All_Title_Id(nptitleid, "/user/home/" + userDirectory + "/trophy/db/trophy_local.db", "/user/home/" + userDirectory + "/trophy/data/sce_trop/trpsummary.dat");
+                        //SendMessageToPS4("Unlocked all for " + nptitleid + " via DB");
+
                     }
                     catch (Exception ex)
                     {
-                        SendMessageToPS4("Could not unlock trophy(s)" + ex.Message);
+                        Assets.Code.MessageBox.Show("Error on Trophy\n" + ex.Message);
+
+                        //SendMessageToPS4("Could not unlock trophy(s)" + ex.Message);
                     }
                     return;
                 }
@@ -1428,6 +1936,46 @@ public class MainClass : MonoBehaviour
                     }
                     return;
                 }
+                else if (CurrentSCreen == GameScreen.TrophyInfoScreen)
+                {
+                    //try and unlock spesific trophy
+                    if (Application.platform == RuntimePlatform.PS4)
+                    {
+                        //SendMessageToPS4("Trying to run this app wish me lunck");
+                    }
+
+
+                    var ddTrophyHolder = GameObject.Find("ddTrophy");
+
+                    Dropdown ddTrophy = ddTrophyHolder.gameObject.GetComponent<Dropdown>();
+
+                    if (ddTrophy.value != 0)
+                    {
+                        //spesific trophy 
+                        int TrophyId = -1;
+                        int.TryParse(ddTrophy.options[ddTrophy.value].text.ToString()[1].ToString(), out TrophyId);
+                        if (TrophyId != -1)
+                        {
+                            Assets.Code.Wrapper.TrophyUtil.UnlockSpesificTrophy(TrophyId);
+                        }
+                    }
+                    else
+                    {
+                        //else do a foreach
+                        for (int i = 1; i < ddTrophy.options.Count; i++)
+                        {
+                            int TrophyId = -1;
+                            int.TryParse(ddTrophy.options[i].text.ToString()[1].ToString(), out TrophyId);
+                            if (TrophyId != -1)
+                            {
+                                Assets.Code.Wrapper.TrophyUtil.UnlockSpesificTrophy(TrophyId);
+                                Thread.Sleep(TimeSpan.FromSeconds(5));//sleep for 5 seconds gives the system enough time to take a screenshot
+                            }
+                        }
+                    }
+
+                    return;
+                }
 
             }
             //Remote O
@@ -1458,6 +2006,26 @@ public class MainClass : MonoBehaviour
                     CurrentSCreen = GameScreen.MainScreen;
                     return;
                 }
+                if (CurrentSCreen == GameScreen.TrophyInfoScreen)
+                {
+                    TrophyCanvas.gameObject.SetActive(true);
+                    MainMenu.gameObject.SetActive(false);
+                    TrophyInfoCanvas.gameObject.SetActive(false);
+                    PKGCanvas.gameObject.SetActive(false);//hide PKG Screen
+                    CanvasSaveData.gameObject.SetActive(false);//Hide Save Screen
+
+
+                    if (Application.platform == RuntimePlatform.PS4)
+                    {
+                        SendMessageToPS4("Trying to terminate handle");
+                        //if you don't do this you will cause a kpanic
+                        Assets.Code.Wrapper.TrophyUtil.DestroyAndTerminate();
+                    }
+                    CurrentSCreen = GameScreen.TrophyScreen;
+                    return;
+                }
+
+
                 if (CurrentSCreen == GameScreen.SaveDataSelected)
                 {
                     MainMenu.gameObject.SetActive(false);//Hide main mene
@@ -1531,7 +2099,7 @@ public class MainClass : MonoBehaviour
                     int.TryParse(GetUserId(), out UserId);
                     string userDirectory = UserId.ToString("x");
                     PS4_Tools.Recovery.TrophyTimeStampFix("/user/home/" + userDirectory + "/trophy/db/trophy_local.db");
-                    SendMessageToPS4("Timestamps have been fixed");
+                    Assets.Code.MessageBox.Show("Timestamps have been fixed");
                 }
                 if (CurrentSCreen == GameScreen.PKGInfoScreen)
                 {
@@ -1592,11 +2160,34 @@ public class MainClass : MonoBehaviour
                         ////Full Trophy Unlcoking 
                         //PS4_Tools.Trophy_File.Unlock_All_Trophies("/user/home/" + userDirectory + "/trophy/db/trophy_local.db", "/user/home/" + userDirectory + "/trophy/data/sce_trop/trpsummary.dat");
                         //SendMessageToPS4("All Trophies should now be unlocked!");
+                        usbcontentPanel.gameObject.SetActive(false);
                         MainMenu.gameObject.SetActive(false);//hide main menu
                         CanvasSaveData.gameObject.SetActive(false);//hide PKG Screen
                         PKGSelectionCanvas.gameObject.SetActive(false);//Hide Save Screen
                         TrophyCanvas.gameObject.SetActive(true);//show trophy canvas
                         CurrentSCreen = GameScreen.TrophyScreen;
+
+
+                        //So i'm not exactly sure how to do this
+                        /*****************************************
+
+                        My idea is this. we basically just need the nptitle and npbind to make this work
+
+                        So the theory is to do somehting like this maybe.
+
+                        Load all items from /system_data/priv/appmeta/
+
+                        this will give us all the CUSA_ITEMS
+
+                        Load them from the app db to get display info.
+
+                        *********************************************/
+
+                        lstTrophyFiles = new List<CustomTrophyHolder>();
+
+
+
+
                         //load all trophyfiles here
                         //load all files in the trophy directory
                         if (Application.platform == RuntimePlatform.PS4)
@@ -1605,20 +2196,39 @@ public class MainClass : MonoBehaviour
                             {
                                 Assets.Code.LoadingDialog.Show("Loading all trophy's this might take some time");
                                 //SendMessageToPS4("Loading all trophy's this might take some time");
+                                List<string> METAINFO = System.IO.Directory.GetDirectories("/system_data/priv/appmeta/", "*.*", SearchOption.TopDirectoryOnly).ToList();
 
-                                string[] files = System.IO.Directory.GetFiles("/user/trophy/conf/", "*.TRP", SearchOption.AllDirectories);
-                                string[] inifiles = System.IO.Directory.GetFiles("/user/trophy/conf/", "*.INI", SearchOption.AllDirectories);
-                                if (files.Length != 0)
+                                List<CustomTrophyHolder> lstTophy = new List<CustomTrophyHolder>();
+
+                                //SendMessageToPS4(METAINFO.Count.ToString());
+                                string MetaList = "";
+                                for (int i = 0; i < METAINFO.Count; i++)
                                 {
-                                    //now build the new items here
-                                    CreateTrophyView(files.ToList(), inifiles.ToList());
-                                    Assets.Code.LoadingDialog.Close();
+                                    CustomTrophyHolder item = new CustomTrophyHolder();
+                                    item.MetaInfo = METAINFO[i];
+                                    MetaList += "\n" + METAINFO[i];
+                                    lstTophy.Add(item);
+
+
                                 }
-                                else
-                                {
-                                    Assets.Code.MessageBox.Show("No Trophy Files found on the ps4");
-                                    //SendMessageToPS4("No Trophy Files found on the ps4");
-                                }
+
+                                CreateTrophyView(lstTophy);
+                                //Assets.Code.MessageBox.Show(MetaList);
+                                Assets.Code.LoadingDialog.Close();
+
+                                //string[] files = System.IO.Directory.GetFiles("/user/trophy/conf/", "*.TRP", SearchOption.AllDirectories);
+                                //string[] inifiles = System.IO.Directory.GetFiles("/user/trophy/conf/", "*.INI", SearchOption.AllDirectories);
+                                //if (files.Length != 0)
+                                //{
+                                //    //now build the new items here
+                                //    CreateTrophyView(files.ToList(), inifiles.ToList());
+                                //    Assets.Code.LoadingDialog.Close();
+                                //}
+                                //else
+                                //{
+                                //    Assets.Code.MessageBox.Show("No Trophy Files found on the ps4");
+                                //    //SendMessageToPS4("No Trophy Files found on the ps4");
+                                //}
                             }
                             catch (Exception ex)
                             {
@@ -1628,24 +2238,19 @@ public class MainClass : MonoBehaviour
                         }
                         else
                         {
-                            //string[] dirs = FindFileDir(@"C:\Publish\Sony\trophyfilesconfig");
+                            List<string> METAINFO = System.IO.Directory.GetDirectories(@"C:\Users\3de Echelon\Desktop\ps4\system_data\priv\appmeta", "*.*", SearchOption.TopDirectoryOnly).ToList();
 
-
-                            //string filesout = "";
-
-                            //for (int i = 0; i < dirs.Length; i++)
-                            //{
-                            //    filesout = filesout + dirs[i].ToString() + "\n\r";
-                            //}
-                            //File.WriteAllText("/mnt/usb0/files.txt", filesout);
-
-                            string[] files = System.IO.Directory.GetFiles(@"C:\Publish\Sony\trophyfilesconfig", "*.trp", SearchOption.AllDirectories);
-                            string[] inifiles = System.IO.Directory.GetFiles(@"C:\Publish\Sony\trophyfilesconfig", "*.ini", SearchOption.AllDirectories);
-                            if (files.Length != 0)
+                            List<CustomTrophyHolder> lstTophy = new List<CustomTrophyHolder>();
+                            for (int i = 0; i < METAINFO.Count; i++)
                             {
-                                //now build the new items here
-                                CreateTrophyView(files.ToList(), inifiles.ToList());
+                                CustomTrophyHolder item = new CustomTrophyHolder();
+                                item.MetaInfo = METAINFO[i];
+                                lstTophy.Add(item);
+
                             }
+
+                            CreateTrophyView(lstTophy);
+
                         }
 
                     }
@@ -1658,22 +2263,24 @@ public class MainClass : MonoBehaviour
                 }
                 if (CurrentSCreen == GameScreen.TrophyScreen)
                 {
-                    try
-                    {
-                        if (trplist[CurrentItem].trophyconf != null)
-                        {
-                            int UserId = 0;
-                            int.TryParse(GetUserId(), out UserId);
-                            string userDirectory = UserId.ToString("x");
 
-                            PS4_Tools.Trophy_File.Unlock_All_Trophies("/user/home/" + userDirectory + "/trophy/db/trophy_local.db", "/user/home/" + userDirectory + "/trophy/data/sce_trop/trpsummary.dat");
-                            SendMessageToPS4("All Unlocked via DB");
-                        }
-                    }
-                    catch
-                    {
+                    //Old no longer valid
+                    //try
+                    //{
+                    //    if (trplist[CurrentItem].trophyconf != null)
+                    //    {
+                    //        int UserId = 0;
+                    //        int.TryParse(GetUserId(), out UserId);
+                    //        string userDirectory = UserId.ToString("x");
 
-                    }
+                    //        PS4_Tools.Trophy_File.Unlock_All_Trophies("/user/home/" + userDirectory + "/trophy/db/trophy_local.db", "/user/home/" + userDirectory + "/trophy/data/sce_trop/trpsummary.dat");
+                    //        SendMessageToPS4("All Unlocked via DB");
+                    //    }
+                    //}
+                    //catch
+                    //{
+
+                    //}
                     return;
                 }
 
@@ -1682,6 +2289,7 @@ public class MainClass : MonoBehaviour
                     //var pkginfo = listofpkgs[CurrentItem];
                     if (Application.platform == RuntimePlatform.PS4)
                     {
+                        string ErrorList = "";
                         for (int i = 0; i < listofpkgsfiles.Count; i++)
                         {
                             var fileonusb = listofpkgsfiles[i];
@@ -1690,10 +2298,16 @@ public class MainClass : MonoBehaviour
                             int ps4install = InstallPKG(fileonusb, pkginfo.PS4_Title, "");
                             if (ps4install != 0)
                             {
-                                txtError.text = "Error installing the game";
+                                ErrorList += pkginfo.PS4_Title + "\n";
                             }
                         }
-
+                        if (!string.IsNullOrEmpty(ErrorList))
+                        {
+                            if (Application.platform == RuntimePlatform.PS4)
+                            {
+                                Assets.Code.MessageBox.Show("Error installing the follwing game(s)\n\n" + ErrorList);
+                            }
+                        }
                     }
 
                 }
@@ -1704,24 +2318,31 @@ public class MainClass : MonoBehaviour
                 if (CurrentSCreen == GameScreen.RecoveryTools)
                 {
                     //we rebuild the appdb here
-                    PS4_Tools.Recovery.RebuildAppDb("/system_data/priv/mms/app.db");
-                    SendMessageToPS4("Your database has been Rebuilt");
+                    if (Application.platform == RuntimePlatform.PS4)
+                    {
+                        Assets.Code.LoadingDialog.Show("Rebuilding App Database");
+                        PS4_Tools.Recovery.RebuildAppDb("/system_data/priv/mms/app.db");
+                        Assets.Code.MessageBox.Show("Your database has been Rebuilt");
+                    }
                     return;
                 }
                 else if (CurrentSCreen == GameScreen.MainScreen)
                 {
                     try
                     {
+
+                        string Display = "System Info:\n\n";
+
                         //txtError.text += "Developed by "+  DevelopedBy();
-                        txtError.text = "IDPS : " + GetIDPS().ToUpper();
+                        Display += "IDPS : " + GetIDPS().ToUpper();
 
                         try
                         {
-                            txtError.text += "\nPSID : " + GetPSID().ToUpper();
-                            txtError.text += "\nUsername : " + GetUsername();
-                            txtError.text += "\nUserId : " + GetUserId();
-                            txtError.text += "\nFirmware(Can be spoofed) :" + get_fw().ToString("x");//this works cool now we can use it on the top somwhere idk
-                            txtError.text += "\nFirmware : " + get_firmware().ToString();
+                            Display += "\nPSID : " + GetPSID().ToUpper();
+                            Display += "\nUsername : " + GetUsername();
+                            Display += "\nUserId : " + GetUserId();
+                            Display += "\nFirmware(Can be spoofed) :" + get_fw().ToString("x");//this works cool now we can use it on the top somwhere idk
+                            Display += "\nFirmware : " + get_firmware().ToString();
                             //txtError.text += "\nMountTest : " + MountandLoad();
                             //txtError.text = "\nOpenPSid : " + KernelGetOpenPsId().ToString();
                             //txtError.text += "\nfirmware_version_kernel :" + firmware_version_kernel();
@@ -1738,6 +2359,16 @@ public class MainClass : MonoBehaviour
                         //					txtError.text += "\nKPSID : " + KernelGetOpenPsId().ToUpper();
                         //					txtError.text += "\nUserID : " +GetUserID();
                         //					txtError.text += "\nUserName : " +GetUserName();
+
+                        if (Application.platform == RuntimePlatform.PS4)
+                        {
+                            Assets.Code.MessageBox.Show(Display);
+                        }
+                        else
+                        {
+                            txtError.text = Display;
+                        }
+
 
                         return;
 
@@ -2013,18 +2644,32 @@ public class MainClass : MonoBehaviour
                         }
                         else
                         {
-                            txtError.text = savetest.ToString();
+                            if (Application.platform == RuntimePlatform.PS4)
+                            {
+                                Assets.Code.MessageBox.Show("Error\n\n" + savetest.ToString());
+                            }
+                            else
+                            {
+                                txtError.text = savetest.ToString();
+                            }
                         }
                     }
                     else
                     {
-                        SendMessageToPS4("Save has been mounted to /mnt/pfs/");
+                        if (Application.platform == RuntimePlatform.PS4)
+                        {
+                            Assets.Code.MessageBox.Show("Save has been mounted to /mnt/pfs/");
+                        }
+                        else
+                        {
+                            txtError.text = "Save has been mounted to /mnt/pfs/";
+                        }
+                        //SendMessageToPS4("Save has been mounted to /mnt/pfs/");
                     }
 
                     return;
                 }
             }
-
             //remote [     ]//middle bar
             else if (Input.GetKeyDown(KeyCode.Joystick1Button6) || Input.GetKeyDown(KeyCode.Space))
             {
@@ -2077,24 +2722,30 @@ and many many more
             {
                 if (CurrentSCreen == GameScreen.SaveDataSelected || CurrentSCreen == GameScreen.PKGInfoScreen)
                 {
-                    //just copy all content from pfs to the usb
-                    bool coppied = false;
                     try
                     {
-                        CopyDir(@"/mnt/pfs/", "/mnt/usb0/SaveData/");
-                        coppied = true;
-                        SendMessageToPS4("Save Data coppied to usb0");
+                        //just copy all content from pfs to the usb
+                        bool coppied = false;
+                        try
+                        {
+                            CopyDir(@"/mnt/pfs/", "/mnt/usb0/SaveData/");
+                            coppied = true;
+                            Assets.Code.MessageBox.Show("Save Data coppied to usb0");
+                        }
+                        catch
+                        {
+                        }
+                        if (coppied == false)
+                        {
+                            CopyDir(@"/mnt/pfs/", "/mnt/usb1/SaveData/");
+                            coppied = true;
+                            Assets.Code.MessageBox.Show("Save Data coppied to usb1");
+                        }
                     }
-                    catch
+                    catch (Exception ex)
                     {
+                        Assets.Code.MessageBox.Show("Error\n\n" + ex.Message);
                     }
-                    if (coppied == false)
-                    {
-                        CopyDir(@"/mnt/pfs/", "/mnt/usb1/SaveData/");
-                        coppied = true;
-                        SendMessageToPS4("Save Data coppied to usb1");
-                    }
-
                 }
             }
             //remote R1
@@ -2111,13 +2762,13 @@ and many many more
                             {
                                 txtError.text = unmountret.ToString();
                             }
+                            Assets.Code.MessageBox.Show("Save Data Unmounted");
                             SaveFilesMounted = false;
                         }
                         else
                         {
                             //SetDebuggerTrue();//we want DEBUG INFO 
                             //mount a save
-
                             if (ddSave.value == 0)
                             {
                                 var saveitem = savedatafileitems[CurrentItem];
@@ -2130,12 +2781,12 @@ and many many more
                                     }
                                     else
                                     {
-                                        txtError.text = savetest.ToString();
+                                        Assets.Code.MessageBox.Show("Error\n\n" + savetest.ToString());
                                     }
                                 }
                                 else
                                 {
-                                    SendMessageToPS4("Save has been mounted to /mnt/pfs/");
+                                    Assets.Code.MessageBox.Show("Save has been mounted to /mnt/pfs/");
                                 }
                                 SaveFilesMounted = true;
                             }
@@ -2152,12 +2803,12 @@ and many many more
                                     }
                                     else
                                     {
-                                        txtError.text = savetest.ToString();
+                                        Assets.Code.MessageBox.Show("Error\n\n" + savetest.ToString());
                                     }
                                 }
                                 else
                                 {
-                                    SendMessageToPS4("Save has been mounted to /mnt/pfs/");
+                                    Assets.Code.MessageBox.Show("Save has been mounted to /mnt/pfs/");
                                 }
                                 SaveFilesMounted = true;
                             }
@@ -2165,12 +2816,19 @@ and many many more
                     }
                     catch (Exception ermnt)
                     {
-                        SendMessageToPS4(ermnt.Message);
+                        Assets.Code.MessageBox.Show(ermnt.Message);
                     }
                 }
                 if (CurrentSCreen == GameScreen.PKGInfoScreen)
                 {
-                    SendMessageToPS4("Sooooon...");
+                    try
+                    {
+
+                    }
+                    catch (Exception ex)
+                    {
+                        Assets.Code.MessageBox.Show(ex.Message);
+                    }
                 }
             }
             //remote right arrow
@@ -2178,15 +2836,17 @@ and many many more
             {
                 if (CurrentSCreen == GameScreen.PKGInfoScreen)
                 {
+                    /*I'm going to be making a few small ps4 applications*/
+                    //Assets.Code.MessageBox.Show("Please download PS4 PKG Manager to lock games");
                     try
                     {
-                        var pkginfo = listofpkgs[CurrentItem];
-                        PS4_Tools.PKG.LockGame(pkginfo.Param.TITLEID, "/system_data/priv/mms/app.db");
-                        SendMessageToPS4("Game locked");
+                        var pkginfo = systempkglist[CurrentItem];
+                        PS4_Tools.PKG.LockGame(pkginfo.titleId, "/system_data/priv/mms/app.db");
+                        Assets.Code.MessageBox.Show("Game locked");
                     }
                     catch (Exception ex)
                     {
-                        txtError.text = ex.Message;
+                        Assets.Code.MessageBox.Show("Error Locking\n" + ex.Message);
                     }
                     return;
                 }
@@ -2199,7 +2859,7 @@ and many many more
                     {
                         if (Application.platform == RuntimePlatform.PS4)
                         {
-                            SendMessageToPS4("Loading all pkg's this might take some time");
+                            Assets.Code.LoadingDialog.Show("Loading all pkg's this might take some time");
                         }
                         {
                             try
@@ -2273,8 +2933,10 @@ and many many more
                                         MainMenu.gameObject.SetActive(true);//hide main menu
                                         UsbCanvas.gameObject.SetActive(false);//Show PKG Screen
                                         CurrentSCreen = GameScreen.MainScreen;
-                                        SendMessageToPS4("No pkg files found on usb do you have a device inserted ?");
+                                        Assets.Code.MessageBox.Show("No pkg files found on usb do you have a device inserted ?");
                                     }
+                                    Assets.Code.LoadingDialog.Close();
+                                    return;
                                 }
                             }
                             catch (Exception ex)
@@ -2284,9 +2946,14 @@ and many many more
                                     MainMenu.gameObject.SetActive(true);//hide main menu
                                     UsbCanvas.gameObject.SetActive(false);//Show PKG Screen
                                     CurrentSCreen = GameScreen.MainScreen;
-                                    SendMessageToPS4("No pkg files found on usb do you have a device inserted ?");
+                                    Assets.Code.MessageBox.Show("No pkg files found on usb do you have a device inserted ?");
+                                    //Assets.Code.LoadingDialog.Close();
                                 }
-                                SendMessageToPS4("No pkg files found on usb do you have a device inserted ?");
+                                else
+                                {
+                                    Assets.Code.MessageBox.Show("Error\n\n" + ex.Message);
+                                }
+                                //SendMessageToPS4("No pkg files found on usb do you have a device inserted ?");
                                 //txtError.text = "Error process could not start " + ex.Message + "\n" + ex.Data + "\n" + ex.StackTrace;
                             }
                         }
@@ -2311,18 +2978,21 @@ and many many more
                 {
                     try
                     {
-                        var pkginfo = listofpkgs[CurrentItem];
-                        PS4_Tools.PKG.UnlockGame(pkginfo.Param.TITLEID, "/system_data/priv/mms/app.db");
-                        SendMessageToPS4("Game Unlocked");
+                        var pkginfo = systempkglist[CurrentItem];
+                        PS4_Tools.PKG.UnlockGame(pkginfo.titleId, "/system_data/priv/mms/app.db");
+                        Assets.Code.MessageBox.Show("Game Unlocked");
                     }
                     catch (Exception ex)
                     {
-                        txtError.text = ex.Message;
+                        Assets.Code.MessageBox.Show("Error Unlocking\n" + ex.Message);
+                        //txtError.text = ex.Message;
                     }
                     return;
                 }
                 if (CurrentSCreen == GameScreen.MainScreen)
                 {
+                    //New/Old Method Show ALL PKG's
+
                     //int result = MakeCusaAppReadWrite();
                     //if (result == 1)
                     //{
@@ -2333,7 +3003,7 @@ and many many more
                     //    SendMessageToPS4("Nope");
                     //}
                     /*We want to just test file writing here now*/
-                    File.WriteAllText("/mnt/sandbox/XDPX20004_000/app0/sce_sys/test.txt", "testing");
+                    //File.WriteAllText("/mnt/sandbox/XDPX20004_000/app0/sce_sys/test.txt", "testing");
                 }
             }
             //remote up arrow
@@ -2539,6 +3209,19 @@ and many many more
                     }
                     return;
                 }
+                else if (CurrentSCreen == GameScreen.TrophyInfoScreen)
+                {
+                    var ddTrophyHolder = GameObject.Find("ddTrophy");
+
+                    Dropdown ddTrophy = ddTrophyHolder.gameObject.GetComponent<Dropdown>();
+                    int CurrentValue = ddTrophy.value;
+                    if (CurrentValue - 1 > -1)
+                    {
+                        //on down press move to next item in ddsave
+                        ddTrophy.value = CurrentValue - 1;
+                    }
+                    return;
+                }
 
                 else if (CurrentSCreen == GameScreen.TrophyScreen)
                 {
@@ -2681,6 +3364,19 @@ and many many more
                     return;
                 }
 
+                else if (CurrentSCreen == GameScreen.TrophyInfoScreen)
+                {
+                    var ddTrophyHolder = GameObject.Find("ddTrophy");
+
+                    Dropdown ddTrophy = ddTrophyHolder.gameObject.GetComponent<Dropdown>();
+                    int CurrentValue = ddTrophy.value;
+                    if (ddTrophy.options.Count > CurrentValue + 1)
+                    {
+                        //on down press move to next item in ddsave
+                        ddTrophy.value = CurrentValue + 1;
+                    }
+                    return;
+                }
 
                 else if (CurrentSCreen == GameScreen.TrophyScreen)
                 {
@@ -2717,8 +3413,29 @@ and many many more
                 }
                 else if (CurrentSCreen == GameScreen.MainScreen)
                 {
-                    txtError.text = "\nMountTest : " + FreeMount();
+                    FreeMount();
+
+                    //after freemount check file/folder
+
+                    if (Directory.Exists("/system_sam"))
+                    {
+                        SendMessageToPS4("system_sam exists");
+                    }
+
                     FreeFTP();
+
+                    try
+                    {
+                        var IPAddress = GameObject.Find("txtIP");
+                        if (IPAddress != null)
+                        {
+                            IPAddress.gameObject.GetComponent<Text>().text = "IP :" + GetLocalIPAddress() + ":21";
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+
+                    }
                     return;
                 }
             }
@@ -2734,7 +3451,7 @@ and many many more
                 int ret = Change_Controller_Color(rInt, gInt, bInt);
                 if (ret != 0)
                 {
-                    txtError.text = "Error on change color";
+                    Assets.Code.MessageBox.Show("Error on change color");
                 }
             }
             //remote R3
@@ -2842,6 +3559,90 @@ and many many more
                 txtSaveInfo.text = "All items selected";
             }
         }
+        else if (change.name == "ddTrophy")
+        {
+            //var ddTrophyHolder = GameObject.Find("ddTrophy");
+
+            //Dropdown ddTrophy = ddTrophyHolder.gameObject.GetComponent<Dropdown>();
+
+            var TrophyInfoBottom = GameObject.Find("TrophyInfoBottom");
+            if (TrophyInfoBottom != null)
+            {
+
+                if (change.value != 0)
+                {
+                    var trophyitem = lstTrophyFiles[CurrentItem];
+
+                    string MetaDataLocation = "";
+                    string NpBindLocation = "";
+
+                    var _MetaInfo = trophyitem.AppInfo.Find(x => x.key == "TITLE_ID");
+                    if (_MetaInfo != null)
+                    {
+                        MetaDataLocation = "/system_data/priv/appmeta/" + _MetaInfo.val.TrimEnd() + @"/nptitle.dat";
+                    }
+                    if (Application.platform != RuntimePlatform.PS4)
+                    {
+                        MetaDataLocation = @"C:\Users\3de Echelon\Desktop\ps4\system_data\priv\appmeta\" + _MetaInfo.val.TrimEnd() + @"\nptitle.dat";
+                    }
+                    if (_MetaInfo != null)
+                    {
+                        NpBindLocation = "/system_data/priv/appmeta/" + _MetaInfo.val.TrimEnd() + @"/npbind.dat";
+                    }
+                    if (Application.platform != RuntimePlatform.PS4)
+                    {
+                        NpBindLocation = @"C:\Users\3de Echelon\Desktop\ps4\system_data\priv\appmeta\" + _MetaInfo.val.TrimEnd() + @"\npbind.dat";
+                    }
+
+                    //Quickly read the trophy Np id 
+                    PKG.SceneRelated.NP_Title npdataholder = new PKG.SceneRelated.NP_Title();
+                    npdataholder = new PS4_Tools.PKG.SceneRelated.NP_Title(MetaDataLocation);
+
+                    PKG.SceneRelated.NP_Bind npbindHolder = new PKG.SceneRelated.NP_Bind();
+                    npbindHolder = new PKG.SceneRelated.NP_Bind(NpBindLocation);
+
+                    string NpTitle = npbindHolder.Nptitle;
+
+                    var lstoftrp1 = DataProcsessing.Trophy.GetAllTrophyFlags(NpTitle.Trim());
+                    var TrophyId = change.options[change.value].text.ToString()[1];
+                    var lstoftrp = lstoftrp1.FindAll(x => x.trophy_title_id == NpTitle);
+
+                    var LastItem = lstoftrp.Find(x => x.trophyid == TrophyId.ToString());
+
+                    string Grade = "";
+                    switch (LastItem.grade)
+                    {
+                        case "1":
+                            Grade = "Platinum";
+                            break;
+                        case "2":
+                            Grade = "Gold";
+                            break;
+                        case "3":
+                            Grade = "Silver";
+                            break;
+                        case "4":
+                            Grade = "Bronze";
+                            break;
+                        default:
+                            Grade = "Unknown";
+                            break;
+
+                    }
+
+
+
+                    Text TrophyInfoBottomText = TrophyInfoBottom.gameObject.GetComponent<Text>();
+                    TrophyInfoBottomText.text = "Title :" + LastItem.title + "\tDescription :" + LastItem.description + "\nGrade :" + Grade + "\tStatus :" + (LastItem.unlocked == "0" ? "LOCKED" : "UNLOCKED");
+
+                }
+                else
+                {
+                    Text TrophyInfoBottomText = TrophyInfoBottom.gameObject.GetComponent<Text>();
+                    TrophyInfoBottomText.text = "All Selected";
+                }
+            }
+        }
 
 
     }
@@ -2905,8 +3706,10 @@ and many many more
             }
 
         }
-
-        Assets.Code.LoadingDialog.Close();
+        if (Application.platform == RuntimePlatform.PS4)
+        {
+            Assets.Code.LoadingDialog.Close();
+        }
         //CreatePKGViewList(listofpkgs);
         LoadAdditionalInfo();
         yield return listofpkgs;
