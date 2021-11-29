@@ -172,6 +172,7 @@ public class MainClass : MonoBehaviour
         TrophyScreen,
         TrophyInfoScreen,
         USBPKGMenu,
+        SettingsMenu,
     }
 
     public GameScreen CurrentSCreen = GameScreen.MainScreen;
@@ -199,7 +200,6 @@ public class MainClass : MonoBehaviour
     public Text SaveStatus;
     public GameObject SaveOptionsList;
     #endregion << Save Data >>
-
 
     #region << PKG Section >>
 
@@ -269,6 +269,15 @@ public class MainClass : MonoBehaviour
 
     #endregion << Recovery Tools >>
 
+    #region << Settings Menu >>
+
+    public static List<GameObject> SettingsItemGameObjectList = new List<GameObject>();
+    public Canvas SettingsCanvas;
+    public ScrollRect settingsRect;
+    public
+        RectTransform settingscontentPanel;
+    #endregion << Settings Menu >>
+
     public Text txtError;
 
     public List<GameObject> ObjectsCreate = new List<GameObject>();
@@ -281,6 +290,7 @@ public class MainClass : MonoBehaviour
 
     public GameObject FilePKGFab;
     public GameObject FileSaveFab;
+    public GameObject SettingsObjectPrefab;
 
     public int FirmHolder = 0;
 
@@ -297,22 +307,34 @@ public class MainClass : MonoBehaviour
         }
     }
 
-    IEnumerator GetLocalIPAddress(Text Text)
+    IEnumerator GetLocalIPAddress(System.Action<string> callback = null)
     {
 
 
 
-
-
-        var host = Dns.GetHostEntry(Dns.GetHostName());
+        bool found = false;
+        IPHostEntry host;
+        yield return host = Dns.GetHostEntry(Dns.GetHostName());
         foreach (var ip in host.AddressList)
         {
             if (ip.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
             {
-                yield return Text.text = "IP :" + ip.ToString() + ":21";
+                if (callback != null)
+                {
+                    callback.Invoke("IP :" + ip.ToString() + ":21");
+                    found = true;
+                    break;
+                }
             }
         }
-        yield return Text.text = "IP :" + "0.0.0.0" + ":21";
+        if (found == false)
+        {
+            //yield return "IP :" + "0.0.0.0" + ":21";
+            if (callback != null)
+            {
+                callback.Invoke("IP :" + "0.0.0.0" + ":21");
+            }
+        }
 
         //throw new Exception("No network adapters with an IPv4 address in the system!");
     }
@@ -382,7 +404,25 @@ public class MainClass : MonoBehaviour
                 txtError.text += "Could not escape sandbox :" + ex.Message;
             }
         }
+        if (FTPAddress == false)
+        {
+            try
+            {
+                var IPAddress = GameObject.Find("txtIP");
+                if (IPAddress != null)
+                {
+                    StartCoroutine(GetLocalIPAddress(returnValue =>
+                    {
+                        IPAddress.gameObject.GetComponent<Text>().text = returnValue;
+                    }));
+                }
+                FTPAddress = true;
+            }
+            catch (Exception ex)
+            {
 
+            }
+        }
         //try
         //{
         //    var IPAddress = GameObject.Find("txtIP");
@@ -502,7 +542,65 @@ public class MainClass : MonoBehaviour
     }
 
 
+    public void CreateSettingsView(List<Assets.Code.Models.Model_Settings> Settings)
+    {
+        SettingsItemGameObjectList.Clear();
 
+
+        GameObject objetc = null;
+
+
+        //ScrollRect settingsRect = SettingsCanvas.Game.Find("Scroll View").GetComponent<ScrollRect>();
+        //RectTransform settingscontentPanel = SettingsCanvas.transform.Find("Content").GetComponent<RectTransform>();
+
+
+
+        int count = settingscontentPanel.transform.childCount;
+        for (int i = 0; i < count; i++)
+        {
+            GameObject.Destroy(settingscontentPanel.GetChild(i).gameObject);
+        }
+
+        for (int i = 0; i < Settings.Count; i++)
+        {
+            objetc = Instantiate(SettingsObjectPrefab, settingscontentPanel);
+            Transform txtHolderSettingName = objetc.transform.Find("SettingName");
+            Text SettingName = txtHolderSettingName.GetComponent<Text>();
+            SettingName.text = Settings[i].SettingName;
+
+            //Image if you want
+            UnityEngine.UI.Image[] HolderforPic = objetc.GetComponentsInChildren<UnityEngine.UI.Image>();
+
+            Transform txtHolderSettingDescription = objetc.transform.Find("SettingDescription");
+            Text SettingDescription = txtHolderSettingDescription.GetComponent<Text>();
+            SettingDescription.text = Settings[i].SettingDescription;
+
+            Transform txtHolderSettingValue = objetc.transform.Find("Setting Value");
+            Text SettingValue = txtHolderSettingValue.GetComponent<Text>();
+            SettingValue.text = Settings[i].SettingValue;
+
+            //HolderforPic.sprite =
+            //objetc.transform.localScale = new Vector3 (1, 1, 1);
+            objetc.transform.SetParent(settingscontentPanel);
+            //objetc.transform.GetChild (0).gameObject.SetActive (true);
+            UnityEngine.UI.Image imgholder = objetc.GetComponent<UnityEngine.UI.Image>();
+            try
+            {
+                imgholder.color = hexToColor("#FFFFFF00");
+            }
+            catch (Exception ex)
+            {
+
+            }
+
+            SettingsItemGameObjectList.Add(objetc);
+        }
+        UnityEngine.UI.Image imgholder1 = SettingsItemGameObjectList[0].GetComponent<UnityEngine.UI.Image>();
+        imgholder1.color = hexToColor("#9F9F9FFF");
+        settingsRect.verticalNormalizedPosition = 0;
+        ScrollToTop(settingsRect);
+
+    }
 
 
     public void CreateSaveDataView(List<SaveDataMain> SaveDirs = null, RectTransform savecontentPanel = null, ScrollRect savescrollRect = null)
@@ -1334,23 +1432,9 @@ public class MainClass : MonoBehaviour
             if (Application.platform == RuntimePlatform.PS4)
             {
                 txtFirm.text = "Firmware :" + FirmHolder.ToString() + " / " + Temperature().ToString() + " ºC";
-                if (FTPAddress == false)
-                {
-                    try
-                    {
-                        var IPAddress = GameObject.Find("txtIP");
-                        if (IPAddress != null)
-                        {
-                            StartCoroutine(GetLocalIPAddress(IPAddress.gameObject.GetComponent<Text>()));
-                        }
-                        FTPAddress = true;
-                    }
-                    catch (Exception ex)
-                    {
 
-                    }
-                }
             }
+
             if (playing_Snd0 == false)
             {
                 if (!audiosource.isPlaying)
@@ -2026,12 +2110,13 @@ public class MainClass : MonoBehaviour
             //Remote O
             else if (Input.GetKeyDown(KeyCode.Joystick1Button1) || Input.GetKeyDown(KeyCode.Keypad6))
             {
-                if (CurrentSCreen == GameScreen.PKGScreen || CurrentSCreen == GameScreen.SaveData)
+                if (CurrentSCreen == GameScreen.PKGScreen || CurrentSCreen == GameScreen.SaveData || CurrentSCreen == GameScreen.SettingsMenu)
                 {
                     //close screen and go back to main menu
                     MainMenu.gameObject.SetActive(true);//Show main menu
                     PKGCanvas.gameObject.SetActive(false);//hide PKG Screen
                     CanvasSaveData.gameObject.SetActive(false);//Hide Save Screen
+                    SettingsCanvas.gameObject.SetActive(false);
                     CurrentSCreen = GameScreen.MainScreen;
 
 
@@ -2207,7 +2292,7 @@ public class MainClass : MonoBehaviour
                         {
                             result = Assets.Code.YesNoDialog.Show("This is still a WIP\nWhen unlocking a trophy and mounting another one you might be kicked out to the user select screen\nJust run the app again for that game it will work on the first mount\n\n Do you understand ?");
                         }
-                        if(result != Assets.Code.YesNoDialog.YesNoRessult.Yes)
+                        if (result != Assets.Code.YesNoDialog.YesNoRessult.Yes)
                         {
                             return;
                         }
@@ -2751,8 +2836,37 @@ public class MainClass : MonoBehaviour
                 if (CurrentSCreen == GameScreen.MainScreen)
                 {
 
-                    //we are redoing this now
-                    Assets.Code.Wrapper.Util.ShowMessageDialog(@"A huge thanks to every developer who contributed to the dev wiki! 
+
+
+                    if (SettingsCanvas.gameObject.activeSelf == false)
+                    {
+                        SettingsCanvas.gameObject.SetActive(true);//show it
+                    }
+                    if (MainMenu.gameObject.activeSelf == true)
+                    {
+                        MainMenu.gameObject.SetActive(false);//hide it
+                    }
+
+                    CurrentSCreen = GameScreen.SettingsMenu;
+                    List<Assets.Code.Models.Model_Settings> items = new List<Assets.Code.Models.Model_Settings>();
+
+                    for (int i = 0; i < 10; i++)
+                    {
+                        Assets.Code.Models.Model_Settings setting = new Assets.Code.Models.Model_Settings();
+                        setting.SettingName = "Enable Chihiro API";
+                        setting.SettingValue = "This will enable the PSN store API";
+                        setting.SettingValue = "Enabled";
+                        items.Add(setting);
+                    }
+                    CreateSettingsView(items);
+
+
+
+                    if (Application.platform == RuntimePlatform.PS4)
+                    {
+
+                        //we are redoing this now
+                        Assets.Code.Wrapper.Util.ShowMessageDialog(@"A huge thanks to every developer who contributed to the dev wiki! 
 Your work made alot of this possible.
 
 Thanks to:
@@ -2766,6 +2880,7 @@ DefaultDNB
 DarkElement
 and many many more
 ");
+                    }
                     ////Still desiding to either show a pannel or not
                     //if (CreditPanel.activeSelf == false)
                     //{
@@ -3318,6 +3433,40 @@ and many many more
                     }
                     return;
                 }
+                else if(CurrentSCreen == GameScreen.SettingsMenu)
+                {
+                    if (CurrentItem > 0)
+                    {
+                        UnityEngine.UI.Image imgholder1 = SettingsItemGameObjectList[CurrentItem].GetComponent<UnityEngine.UI.Image>();
+                        imgholder1.color = hexToColor("#FFFFFF00");
+                        CurrentItem--;
+                        imgholder1 = SettingsItemGameObjectList[CurrentItem].GetComponent<UnityEngine.UI.Image>();
+                        imgholder1.color = hexToColor("#9F9F9FFF");
+
+                        //					float scrollValue = 1 + contentPanel.anchoredPosition.y/scrollRect.content.rect.height;
+                        //					scrollRect.verticalScrollbar.value = scrollValue;					
+                        if (settingsRect.verticalNormalizedPosition >= 0 && CurrentItem < 4)
+                        {
+                            settingscontentPanel.anchoredPosition += new Vector2(0, 146.6F);
+                        }
+
+                        if (settingscontentPanel.anchoredPosition.y > 0)
+                        {
+                            settingscontentPanel.anchoredPosition -= new Vector2(0, 146.6F);
+                        }
+                        if (settingscontentPanel.anchoredPosition.y < 0)
+                        {
+                            settingscontentPanel.anchoredPosition = new Vector2(0, 0);
+                        }
+                        //					var pkginfo = listofpkgs [CurrentItem];
+                        //					byte[] output = new byte[32];
+                        //					PS4_Tools.Util.SCEUtil.sceSblSsDecryptSealedKey(
+                        //
+                        //					PKGAditionalInfo.text = "Aditional Information : ";
+                        //					PKGAditionalInfo.text += "\nSealedKey : " + ;
+                    }
+                    return;
+                }
             }
             //remote down arrow
             else if (Input.GetKeyDown(KeyCode.Joystick1Button12) || Input.GetKeyDown(KeyCode.DownArrow))
@@ -3472,6 +3621,39 @@ and many many more
                     }
                     return;
                 }
+                else if (CurrentSCreen == GameScreen.SettingsMenu)
+                {
+                    if (CurrentItem < SettingsItemGameObjectList.Count - 1)
+                    {
+                        UnityEngine.UI.Image imgholder1 = SettingsItemGameObjectList[CurrentItem].GetComponent<UnityEngine.UI.Image>();
+                        imgholder1.color = hexToColor("#FFFFFF00");
+                        CurrentItem++;
+                        imgholder1 = SettingsItemGameObjectList[CurrentItem].GetComponent<UnityEngine.UI.Image>();
+                        imgholder1.color = hexToColor("#9F9F9FFF");
+
+                        //					float scrollValue = 1 + contentPanel.anchoredPosition.y/scrollRect.content.rect.height;
+                        //					scrollRect.verticalScrollbar.value = scrollValue;					
+                        if (settingsRect.verticalNormalizedPosition >= 0 && CurrentItem > 4)
+                        {
+                            settingscontentPanel.anchoredPosition += new Vector2(0, 146.6F);
+                        }
+                        else if (settingscontentPanel.anchoredPosition.y > 0)
+                        {
+                            settingscontentPanel.anchoredPosition -= new Vector2(0, 146.6F);
+                        }
+                        else if (settingscontentPanel.anchoredPosition.y < 0)
+                        {
+                            settingscontentPanel.anchoredPosition = new Vector2(0, 0);
+                        }
+                        //					var pkginfo = listofpkgs [CurrentItem];
+                        //					byte[] output = new byte[32];
+                        //					PS4_Tools.Util.SCEUtil.sceSblSsDecryptSealedKey(
+                        //
+                        //					PKGAditionalInfo.text = "Aditional Information : ";
+                        //					PKGAditionalInfo.text += "\nSealedKey : " + ;
+                    }
+                    return;
+                }
                 else if (CurrentSCreen == GameScreen.MainScreen)
                 {
 
@@ -3494,7 +3676,10 @@ and many many more
                         var IPAddress = GameObject.Find("txtIP");
                         if (IPAddress != null)
                         {
-                            StartCoroutine(GetLocalIPAddress(IPAddress.gameObject.GetComponent<Text>()));
+                            StartCoroutine(GetLocalIPAddress(returnValue =>
+                            {
+                                IPAddress.gameObject.GetComponent<Text>().text = returnValue;
+                            }));
                         }
                     }
                     catch (Exception ex)
