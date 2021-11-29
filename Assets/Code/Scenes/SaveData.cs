@@ -148,13 +148,23 @@ namespace Assets.Code.Scenes
                             }
                             else
                             {
-                                DisplayName = "unknown" + "(" + saves[i].title_id + ")";
+                                //get data from chihiro
+                                var items = Wrapper.PS4_chihiro_API.GetGameInfoByTitleId(saves[i].title_id + "_00");
+                                if (items != null)
+                                {
+                                    DisplayName = items.TitleName + "(" + saves[i].title_id + ")";
+                                }
+                                else
+                                {
+                                    DisplayName = "unknown" + "(" + saves[i].title_id + ")";
+                                }
                             }
                             datitem.TITLE = DisplayName;
                             datitem.TitleId = saves[i].title_id;
                             datitem.SaveFilePath = SaveFileLocation + saves[i].title_id;
                             datitem.SaveMetaFilePath = SaveFileMetaData + saves[i].title_id;
                             var saves_with_id = saves.Where(x => x.title_id == saves[i].title_id).ToList();
+                            bool hasImage = false;
                             for (int ix = 0; ix < saves_with_id.Count; ix++)
                             {
                                 try
@@ -169,6 +179,14 @@ namespace Assets.Code.Scenes
                                         //use the png file 
                                         holderitem.ImageLocation = datitem.SaveMetaFilePath +"/"+ saves_with_id[ix].dir_name + "_icon0.png";
                                     }
+                                    if (File.Exists(holderitem.ImageLocation))
+                                    {
+                                        hasImage = true;
+                                    }
+
+
+
+                                    
 
                                     string binfname = saves_with_id[ix].dir_name;//easy stuff now
                                     holderitem.SaveDataFile = datitem.SaveFilePath + "/sdimg_" + binfname;
@@ -183,6 +201,17 @@ namespace Assets.Code.Scenes
 
                                 }
                             }
+
+
+                            if (hasImage == false)
+                            {
+                                var items = Wrapper.PS4_chihiro_API.GetImageFromTitleId(saves[i].title_id + "_00");
+                                if (items != null)
+                                {
+                                    datitem.ImageBytes = items;
+                                }
+                            }
+
                             //datitem.ListOfSaveItesm
                             MainClass.savedatafileitems.Add(datitem);
 

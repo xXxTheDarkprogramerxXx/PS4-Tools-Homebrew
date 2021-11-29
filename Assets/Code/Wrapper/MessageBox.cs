@@ -18,6 +18,40 @@ namespace Assets.Code
         }
     }
 
+
+    public class YesNoDialog
+    {
+
+        public enum YesNoRessult
+        {
+            Yes,
+            No,
+            Cancled,
+        }
+
+        /// <summary>
+        /// returns True when user accepts
+        /// </summary>
+        /// <param name="Message"></param>
+        /// <returns></returns>
+        public static YesNoRessult Show(string Message)
+        {
+
+            int rtn = Wrapper.Util.ShowMessageYesNoDialog(Message);
+            if (rtn == 1)
+            {
+                //user accapted
+                return YesNoRessult.Yes;
+            }
+            return YesNoRessult.No;
+        }
+
+        public static void Close()
+        {
+            Wrapper.Util.HideDialog();
+        }
+    }
+
     public class LoadingDialog
     {
         public static void Show(string Message)

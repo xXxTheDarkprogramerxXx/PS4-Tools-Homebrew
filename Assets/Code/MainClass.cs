@@ -144,6 +144,8 @@ public class MainClass : MonoBehaviour
     [DllImport("universal")]
     private static extern int MakeSymLink(string source, string destination);
 
+    [DllImport("universal")]
+    private static extern void Install_Patches(int FW);
 
     #endregion << Universal PRX >>
 
@@ -295,17 +297,23 @@ public class MainClass : MonoBehaviour
         }
     }
 
-    public static string GetLocalIPAddress()
+    IEnumerator GetLocalIPAddress(Text Text)
     {
+
+
+
+
+
         var host = Dns.GetHostEntry(Dns.GetHostName());
         foreach (var ip in host.AddressList)
         {
             if (ip.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
             {
-                return ip.ToString();
+                yield return Text.text = "IP :" + ip.ToString() + ":21";
             }
         }
-        return "0.0.0.0";
+        yield return Text.text = "IP :" + "0.0.0.0" + ":21";
+
         //throw new Exception("No network adapters with an IPv4 address in the system!");
     }
 
@@ -314,7 +322,12 @@ public class MainClass : MonoBehaviour
     {
 
         //int holder = GetInteger();
-
+        //System.Net.ServicePointManager.ServerCertificateValidationCallback +=
+        //    (sender, cert, chain, sslPolicyErrors) =>
+        //    {
+        //        if (cert != null) System.Diagnostics.Debug.WriteLine(cert);
+        //        return true;
+        //    };
         audiosource = FindObjectOfType<AudioSource>();
         audiosource.loop = false;
         if (!audiosource.isPlaying)
@@ -474,6 +487,8 @@ public class MainClass : MonoBehaviour
         public string SaveFilePath { get; set; }
         public string SaveMetaFilePath { get; set; }
         public List<SaveDataHolder> ListOfSaveItesm = new List<SaveDataHolder>();
+
+        public byte[] ImageBytes { get; set; }
         //public List<string> 
     }
 
@@ -482,6 +497,8 @@ public class MainClass : MonoBehaviour
         public string SaveDataFile { get; set; }
         public string SealedKeyFile { get; set; }
         public string ImageLocation { get; set; }
+
+        public byte[] ImageBytes { get; set; }
     }
 
 
@@ -510,8 +527,15 @@ public class MainClass : MonoBehaviour
             {
                 try
                 {
-                    byte[] data = File.ReadAllBytes(SaveDirs[i].ListOfSaveItesm[0].ImageLocation);
-                    HolderforPic[1].sprite = CreateSpriteFromBytes(data);
+                    if (File.Exists(SaveDirs[i].ListOfSaveItesm[0].ImageLocation))
+                    {
+                        byte[] data = File.ReadAllBytes(SaveDirs[i].ListOfSaveItesm[0].ImageLocation);
+                        HolderforPic[1].sprite = CreateSpriteFromBytes(data);
+                    }
+                    else
+                    {
+                        HolderforPic[1].sprite = CreateSpriteFromBytes(SaveDirs[i].ImageBytes);
+                    }
                 }
                 catch
                 {
@@ -1317,7 +1341,7 @@ public class MainClass : MonoBehaviour
                         var IPAddress = GameObject.Find("txtIP");
                         if (IPAddress != null)
                         {
-                            IPAddress.gameObject.GetComponent<Text>().text = "IP :" + GetLocalIPAddress() + ":21";
+                            StartCoroutine(GetLocalIPAddress(IPAddress.gameObject.GetComponent<Text>()));
                         }
                         FTPAddress = true;
                     }
@@ -1731,7 +1755,8 @@ public class MainClass : MonoBehaviour
                         else
                         {
                             //error out here
-                            Assets.Code.MessageBox.Show("npbind could not be found you wont be able to use this option");
+                            Assets.Code.MessageBox.Show("npbind could not be found you wont be able to use this option sorry");
+                            return;
 
                         }
                         //if (npdataholder != null)
@@ -2048,8 +2073,6 @@ public class MainClass : MonoBehaviour
                     CurrentSCreen = GameScreen.TrophyScreen;
                     return;
                 }
-
-
                 if (CurrentSCreen == GameScreen.SaveDataSelected)
                 {
                     MainMenu.gameObject.SetActive(false);//Hide main mene
@@ -2107,6 +2130,10 @@ public class MainClass : MonoBehaviour
                     //}
                     //else
                     {
+
+                        if (Application.platform == RuntimePlatform.PS4)
+                            Assets.Code.MessageBox.Show("To properly use this function you need to use a hen/mira with savedata patches\nOr a save mounter\nPathces are still being ported");
+
                         Assets.Code.Scenes.SaveData sd = new Assets.Code.Scenes.SaveData();
                         Assets.Code.Scenes.SaveData.Load load = new Assets.Code.Scenes.SaveData.Load();
                         load.ToDisplay(MainMenu, CanvasSaveData, PKGSelectionCanvas, savecontentPanel, savescrollRect, this);
@@ -2174,6 +2201,16 @@ public class MainClass : MonoBehaviour
 
                     try
                     {
+                        //default to this so we can test locally
+                        Assets.Code.YesNoDialog.YesNoRessult result = Assets.Code.YesNoDialog.YesNoRessult.Yes;
+                        if (Application.platform == RuntimePlatform.PS4)
+                        {
+                            result = Assets.Code.YesNoDialog.Show("This is still a WIP\nWhen unlocking a trophy and mounting another one you might be kicked out to the user select screen\nJust run the app again for that game it will work on the first mount\n\n Do you understand ?");
+                        }
+                        if(result != Assets.Code.YesNoDialog.YesNoRessult.Yes)
+                        {
+                            return;
+                        }
                         //here is to the new one 
                         //int UserId = 0;
                         //int.TryParse(GetUserId(), out UserId);
@@ -3437,6 +3474,10 @@ and many many more
                 }
                 else if (CurrentSCreen == GameScreen.MainScreen)
                 {
+
+
+                    Install_Patches(get_firmware());
+
                     FreeMount();
 
                     //after freemount check file/folder
@@ -3453,7 +3494,7 @@ and many many more
                         var IPAddress = GameObject.Find("txtIP");
                         if (IPAddress != null)
                         {
-                            IPAddress.gameObject.GetComponent<Text>().text = "IP :" + GetLocalIPAddress() + ":21";
+                            StartCoroutine(GetLocalIPAddress(IPAddress.gameObject.GetComponent<Text>()));
                         }
                     }
                     catch (Exception ex)

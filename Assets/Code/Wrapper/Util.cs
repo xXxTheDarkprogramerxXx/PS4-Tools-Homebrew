@@ -32,6 +32,13 @@ namespace Assets.Code.Wrapper
         [DllImport("universal")]
         public static extern int ShowLoadingDialog(string Message);
 
+        [DllImport("universal")]
+        public static extern int ShowMessageYesNoDialog(string Message);
+
+
+        [DllImport("universal")]
+        public static extern int SendMessageToPS4(string Message);
+
     }
 
 
