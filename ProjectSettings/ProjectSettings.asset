@@ -442,7 +442,7 @@ PlayerSettings:
   ps4PronunciationSIGPath: 
   ps4BackgroundImagePath: 
   ps4StartupImagePath: C:/Users/3de Echelon/Pictures/Sony/PS4 Tools/PS4Ready.png
-  ps4SaveDataImagePath: 
+  ps4SaveDataImagePath: PS4/sce_sys/icon0.png
   ps4SdkOverride: 
   ps4BGMPath: 
   ps4ShareFilePath: 
@@ -460,7 +460,7 @@ PlayerSettings:
   ps4DownloadDataSize: 0
   ps4GarlicHeapSize: 2048
   ps4ProGarlicHeapSize: 2560
-  ps4Passcode: frAQBc8Wsa1xVPfvJcrgRYwTiizs2trQ
+  ps4Passcode: 00000000000000000000000000000000
   ps4pnSessions: 1
   ps4pnPresence: 1
   ps4pnFriends: 1

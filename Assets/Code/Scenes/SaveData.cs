@@ -148,11 +148,18 @@ namespace Assets.Code.Scenes
                             }
                             else
                             {
-                                //get data from chihiro
-                                var items = Wrapper.PS4_chihiro_API.GetGameInfoByTitleId(saves[i].title_id + "_00");
-                                if (items != null)
+                                if (PlayerPrefs.GetString("EnableChihiroAPI", "Enabled") == "Enabled")
                                 {
-                                    DisplayName = items.TitleName + "(" + saves[i].title_id + ")";
+                                    //get data from chihiro
+                                    var items = Wrapper.PS4_chihiro_API.GetGameInfoByTitleId(saves[i].title_id + "_00");
+                                    if (items != null)
+                                    {
+                                        DisplayName = items.TitleName + "(" + saves[i].title_id + ")";
+                                    }
+                                    else
+                                    {
+                                        DisplayName = "unknown" + "(" + saves[i].title_id + ")";
+                                    }
                                 }
                                 else
                                 {

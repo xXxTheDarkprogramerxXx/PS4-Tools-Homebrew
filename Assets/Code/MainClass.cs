@@ -567,9 +567,18 @@ public class MainClass : MonoBehaviour
             Transform txtHolderSettingName = objetc.transform.Find("SettingName");
             Text SettingName = txtHolderSettingName.GetComponent<Text>();
             SettingName.text = Settings[i].SettingName;
+            if (Settings[i].SettingTitle == true)
+            {
+                SettingName.alignment = TextAnchor.MiddleCenter;
+            }
 
             //Image if you want
             UnityEngine.UI.Image[] HolderforPic = objetc.GetComponentsInChildren<UnityEngine.UI.Image>();
+
+            if (Settings[i].SettingTitle == true)
+            {
+                HolderforPic[1].gameObject.SetActive(false);//hide the icon
+            }
 
             Transform txtHolderSettingDescription = objetc.transform.Find("SettingDescription");
             Text SettingDescription = txtHolderSettingDescription.GetComponent<Text>();
@@ -578,6 +587,7 @@ public class MainClass : MonoBehaviour
             Transform txtHolderSettingValue = objetc.transform.Find("Setting Value");
             Text SettingValue = txtHolderSettingValue.GetComponent<Text>();
             SettingValue.text = Settings[i].SettingValue;
+
 
             //HolderforPic.sprite =
             //objetc.transform.localScale = new Vector3 (1, 1, 1);
@@ -2105,7 +2115,41 @@ public class MainClass : MonoBehaviour
 
                     return;
                 }
+                else if (CurrentSCreen == GameScreen.SettingsMenu)
+                {
+                    var systemSettings = Assets.Code.Data.SettingsData.GetAllSettings();
+                    var settingItem = systemSettings[CurrentItem];
+                    try
+                    {
 
+                        var settingvalue = PlayerPrefs.GetString(settingItem.SettingPref, "Enabled");
+                        if (settingvalue == "Enabled")
+                        {
+                            PlayerPrefs.SetString(settingItem.SettingPref, "Disabled");
+                        }
+                        else
+                        {
+                            PlayerPrefs.SetString(settingItem.SettingPref, "Enabled");
+                        }
+                        PlayerPrefs.Save();
+
+                        //Modify item in view
+
+
+                        Transform txtHolderSettingValue = SettingsItemGameObjectList[CurrentItem].transform.Find("Setting Value");
+                        Text SettingValue = txtHolderSettingValue.GetComponent<Text>();
+                        SettingValue.text = PlayerPrefs.GetString(settingItem.SettingPref, "Enabled");
+                        //CreateSettingsView(Assets.Code.Data.SettingsData.GetAllSettings());
+                    }
+                    catch (Exception ex)
+                    {
+                        if (Application.platform == RuntimePlatform.PS4)
+                        {
+                            Assets.Code.MessageBox.Show(ex.Message);
+                        }
+                    }
+                    return;
+                }
             }
             //Remote O
             else if (Input.GetKeyDown(KeyCode.Joystick1Button1) || Input.GetKeyDown(KeyCode.Keypad6))
@@ -2849,15 +2893,15 @@ public class MainClass : MonoBehaviour
 
                     CurrentSCreen = GameScreen.SettingsMenu;
                     List<Assets.Code.Models.Model_Settings> items = new List<Assets.Code.Models.Model_Settings>();
-
-                    for (int i = 0; i < 10; i++)
-                    {
-                        Assets.Code.Models.Model_Settings setting = new Assets.Code.Models.Model_Settings();
-                        setting.SettingName = "Enable Chihiro API";
-                        setting.SettingValue = "This will enable the PSN store API";
-                        setting.SettingValue = "Enabled";
-                        items.Add(setting);
-                    }
+                    items = Assets.Code.Data.SettingsData.GetAllSettings();
+                    //for (int i = 0; i < 10; i++)
+                    //{
+                    //    Assets.Code.Models.Model_Settings setting = new Assets.Code.Models.Model_Settings();
+                    //    setting.SettingName = "Enable Chihiro API";
+                    //    setting.SettingDescription = "This will enable the PSN store API";
+                    //    setting.SettingValue = "Enabled";
+                    //    items.Add(setting);
+                    //}
                     CreateSettingsView(items);
 
 
@@ -2948,45 +2992,103 @@ and many many more
                             if (ddSave.value == 0)
                             {
                                 var saveitem = savedatafileitems[CurrentItem];
-                                int savetest = MountSaveData(Path.GetFileName(saveitem.SaveFilePath), "0000000000000000000000000000000000000000000000000000000000000000");
-                                if (savetest != 0)
+
+                                //thanks to our new DB here you go
+                                string fingerpirnt = Assets.Code.Wrapper.pstools_api.GetGameInfoByTitleId(saveitem.TitleId.Replace("_00", ""));
+                                if (fingerpirnt.Replace("\"", "") == "")
                                 {
-                                    if (savetest == -2137063421)
+                                    int savetest = MountSaveData(Path.GetFileName(saveitem.SaveFilePath), fingerpirnt.Replace("\"", ""));
+                                    if (savetest != 0)
                                     {
-                                        //didnt error it actually mounted to the pfs path 
+                                        if (savetest == -2137063421)
+                                        {
+                                            //didnt error it actually mounted to the pfs path 
+                                        }
+                                        else
+                                        {
+                                            //try again with a trick 
+                                            Assets.Code.MessageBox.Show("Error\n\n" + savetest.ToString());
+                                            //hope we have patches
+
+                                        }
                                     }
                                     else
                                     {
-                                        Assets.Code.MessageBox.Show("Error\n\n" + savetest.ToString());
+                                        Assets.Code.MessageBox.Show("Save has been mounted to /mnt/pfs/");
                                     }
                                 }
                                 else
                                 {
-                                    Assets.Code.MessageBox.Show("Save has been mounted to /mnt/pfs/");
+                                    //hope we have patches
+                                    int savetest = MountSaveData(Path.GetFileName(saveitem.SaveFilePath), "294a5ed06db170618f2eed8c424b9d828879c080cc66fbc4864f69e974deb856");
+                                    if (savetest != 0)
+                                    {
+                                        if (savetest == -2137063421)
+                                        {
+                                            //didnt error it actually mounted to the pfs path 
+                                        }
+                                        else
+                                        {
+                                            //try again with a trick 
+                                            Assets.Code.MessageBox.Show("Error\n\n" + savetest.ToString());
+                                        }
+                                    }
+                                    else
+                                    {
+                                        SaveFilesMounted = true;
+                                        Assets.Code.MessageBox.Show("Save has been mounted to /mnt/pfs/");
+                                    }
                                 }
-                                SaveFilesMounted = true;
+
+                              
                             }
                             else
                             {
                                 //we only want the one 
                                 var saveitem = savedatafileitems[CurrentItem];
-                                int savetest = MountSaveData_Path(Path.GetFileName(saveitem.SaveFilePath), Path.GetFileName(saveitem.ListOfSaveItesm[ddSave.value - 1].SaveDataFile).Replace("sdimg_", ""), "0000000000000000000000000000000000000000000000000000000000000000");
-                                if (savetest != 0)
+                                string fingerpirnt = Assets.Code.Wrapper.pstools_api.GetGameInfoByTitleId(saveitem.TitleId.Replace("_00", ""));
+                                if (fingerpirnt.Replace("\"", "") == "")
                                 {
-                                    if (savetest == -2137063421)
+                                    int savetest = MountSaveData_Path(Path.GetFileName(saveitem.SaveFilePath), Path.GetFileName(saveitem.ListOfSaveItesm[ddSave.value - 1].SaveDataFile).Replace("sdimg_", ""), fingerpirnt.Replace("\"", ""));
+                                    if (savetest != 0)
                                     {
-                                        //didnt error it actually mounted to the pfs path 
+                                        if (savetest == -2137063421)
+                                        {
+                                            //didnt error it actually mounted to the pfs path 
+                                        }
+                                        else
+                                        {
+                                            Assets.Code.MessageBox.Show("Error\n\n" + savetest.ToString());
+                                        }
                                     }
                                     else
                                     {
-                                        Assets.Code.MessageBox.Show("Error\n\n" + savetest.ToString());
+                                        Assets.Code.MessageBox.Show("Save has been mounted to /mnt/pfs/");
+                                        SaveFilesMounted = true;
                                     }
                                 }
                                 else
                                 {
-                                    Assets.Code.MessageBox.Show("Save has been mounted to /mnt/pfs/");
+                                    int savetest = MountSaveData_Path(Path.GetFileName(saveitem.SaveFilePath), Path.GetFileName(saveitem.ListOfSaveItesm[ddSave.value - 1].SaveDataFile).Replace("sdimg_", ""), "294a5ed06db170618f2eed8c424b9d828879c080cc66fbc4864f69e974deb856");
+                                    if (savetest != 0)
+                                    {
+                                        if (savetest == -2137063421)
+                                        {
+                                            //didnt error it actually mounted to the pfs path 
+                                        }
+                                        else
+                                        {
+                                            Assets.Code.MessageBox.Show("Error\n\n" + savetest.ToString());
+                                        }
+                                    }
+                                    else
+                                    {
+                                        Assets.Code.MessageBox.Show("Save has been mounted to /mnt/pfs/");
+                                        SaveFilesMounted = true;
+                                    }
                                 }
-                                SaveFilesMounted = true;
+                                
+                               
                             }
                         }
                     }
@@ -3433,7 +3535,7 @@ and many many more
                     }
                     return;
                 }
-                else if(CurrentSCreen == GameScreen.SettingsMenu)
+                else if (CurrentSCreen == GameScreen.SettingsMenu)
                 {
                     if (CurrentItem > 0)
                     {

@@ -10,5 +10,8 @@ namespace Assets.Code.Models
         public string SettingName { get; set; }
         public string SettingDescription { get; set; }
         public string SettingValue { get; set; }
+        public string SettingPref { get; set; }
+
+        public bool SettingTitle { get; set; }
     }
 }

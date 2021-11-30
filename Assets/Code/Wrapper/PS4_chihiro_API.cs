@@ -220,4 +220,71 @@ namespace Assets.Code.Wrapper
         }
 
     }
+
+
+    public class pstools_api
+    {
+        public static string GetGameInfoByTitleId(string TitleId)
+        {
+           
+            string URL = "http://pstools.co.za/GetKeyCode?titleId=" + TitleId ;
+            //using (WebClient client = new WebClient())
+            {
+                //add protocols incase sony wants to add them
+                //System.Net.ServicePointManager.SecurityProtocol = System.Net.SecurityProtocolType.Tls | System.Net.SecurityProtocolType.Ssl3;
+                //add a header cause sometimes they check this setting 
+                //also we can make the Header match the ps4 if need be
+                //client.Headers.Add("user-agent", "Only a test!");
+
+
+                //string xmlfilecontent = client.DownloadString(URL);
+                try
+                {
+
+                    //Unity not playing fair so ill make a c function
+                    //var aesCrypto = new System.Security.Cryptography.AesCryptoServiceProvider();
+                    //X509Certificate2 rootcert = new X509Certificate2("Assets/Scripts/adminClient.p12", "xxxxxx");
+
+                    using (UnityWebRequest www = UnityWebRequest.Get(URL))
+                    {
+                        //www.SetRequestHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:69.0) Gecko/20100101 Firefox/69.0");
+                        var request = www.SendWebRequest();
+
+                        while (!request.isDone)
+                        {
+                            Debug.Log("Download Stat: " + request.progress);
+                        }
+                        if (www.isNetworkError || www.isHttpError)
+                        {
+                            if (Application.platform == RuntimePlatform.PS4)
+                            {
+                                Util.SendMessageToPS4(www.error);
+                            }
+                            Debug.Log(www.error);
+                        }
+                        else
+                        {
+                            return request.webRequest.downloadHandler.text;
+                        }
+                        //string savePath = string.Format("{0}/{1}.pdb", Application.persistentDataPath, file_name);
+                        //System.IO.File.WriteAllText(savePath, www.downloadHandler.text);
+
+
+
+                    }
+                }
+                catch (Exception ex)
+                {
+                    if (Application.platform == RuntimePlatform.PS4)
+                    {
+                        Assets.Code.MessageBox.Show(ex.Message + ex.StackTrace);
+                    }
+                    //json changed ???
+                }
+            }
+            return "";
+        }
+
+    }
+
 }
