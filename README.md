@@ -17,7 +17,7 @@
  
  Click Below to download the latest version
  
- [![GitHub release (latest by date)](https://img.shields.io/github/downloads/xXxTheDarkprogramerxXx/PS4_Tools/HB_V1.3/total?style=for-the-badge?label=Download%20Ps4%20Homebrew)](https://github.com/xXxTheDarkprogramerxXx/PS4_Tools/releases/tag/HB_V1.3)
+ [![GitHub release (latest by date)](https://img.shields.io/github/downloads/xXxTheDarkprogramerxXx/PS4_Tools/HB_V1.32/total?style=for-the-badge?label=Download%20Ps4%20Homebrew)](https://github.com/xXxTheDarkprogramerxXx/PS4_Tools/releases/tag/HB_V1.32)
  
  
  
