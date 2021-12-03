@@ -14,12 +14,9 @@ namespace Assets.Code.Scenes
 
         public class Load
         {
-
-
-
-            public void ToDisplay(Canvas MainMenu, Canvas CanvasSaveData, Canvas PKGSelectionCanvas ,RectTransform savecontentPanel, ScrollRect savescrollRect, MainClass main)
+            public void ToDisplay(Canvas MainMenu, Canvas CanvasSaveData, Canvas PKGSelectionCanvas, RectTransform savecontentPanel, ScrollRect savescrollRect, MainClass main)
             {
-                                 //SendMessageToPS4("Something broke");
+                //SendMessageToPS4("Something broke");
                 MainMenu.gameObject.SetActive(false);//Hide main mene
                 CanvasSaveData.gameObject.SetActive(true);//Show Save Screen
                 PKGSelectionCanvas.gameObject.SetActive(false);//hide PKG Screen
@@ -27,82 +24,148 @@ namespace Assets.Code.Scenes
                 MainClass.CurrentItem = 0;//do this for item click handler
                 try
                 {
-                    #region << Old No Longer Required >>
-                    /*Old no longer required*/
-                    //if (Application.platform == RuntimePlatform.PS4)
-                    //{
-                    //    Assets.Code.LoadingDialog.Show("Loading save files\nplease wait ...");
 
-                    //    //SendMessageToPS4("Something broke 3");
-                    //    int UserId = 0;
-                    //    int.TryParse(MainClass.Get_UserId(), out UserId);
-                    //    string userDirectory = UserId.ToString("x");
-                    //    //SendMessageToPS4("Something broke "+userDirectory);
-                    //    //SendMessageToPS4("Loading saves");
-                    //    //you can get the userdirectory like this or ask the ps4 for it but this is just easier
-                    //    string[] files = System.IO.Directory.GetDirectories(@"/user/home/" + userDirectory + "/savedata/", "*", SearchOption.TopDirectoryOnly);
-                    //    string[] savemetafiles = System.IO.Directory.GetDirectories(@"/user/home/" + userDirectory + "/savedata_meta/user", "*", SearchOption.TopDirectoryOnly);
-
-                    //    MainClass.savedatafileitems = new List<MainClass.SaveDataMain>();
-
-                    //    for (int i = 0; i < files.Length; i++)
-                    //    {
-                    //        MainClass.SaveDataMain datitem = new MainClass.SaveDataMain();
-                    //        datitem.SaveFilePath = files[i];
-                    //        for (int x = 0; x < savemetafiles.Length; x++)
-                    //        {
-
-                    //            string DirSaveName = new DirectoryInfo(datitem.SaveFilePath).Name;
-                    //            string DirSaveMetaName = new DirectoryInfo(savemetafiles[x]).Name;
-                    //            if (DirSaveName == DirSaveMetaName)//Directories match
-                    //            {
-                    //                datitem.SaveMetaFilePath = DirSaveMetaName;
-                    //                //get all saveenc files in the savedir
-                    //                string[] encsavefiles = System.IO.Directory.GetFiles(files[i], "*.bin", SearchOption.TopDirectoryOnly);//get all encyrption files
-                    //                for (int ix = 0; ix < encsavefiles.Length; ix++)
-                    //                {
-                    //                    try
-                    //                    {
-                    //                        //set the data inside
-                    //                        //sony was really cute left us the image in the meta path 
-                    //                        //sce_icon0png1
-                    //                        MainClass.SaveDataHolder holderitem = new MainClass.SaveDataHolder();
-                    //                        var allpngfiles = Directory.GetFiles(savemetafiles[x], "*.png", SearchOption.TopDirectoryOnly)
-                    //                            .ToList();
-                    //                        if (allpngfiles.Count != 0)
-                    //                        {
-                    //                            holderitem.ImageLocation = allpngfiles[0].ToString();
-                    //                        }
-                    //                        string binfname = Path.GetFileNameWithoutExtension(encsavefiles[ix]);//since we know its bin
-                    //                        holderitem.SaveDataFile = files[i] + "/sdimg_" + binfname;//is the bigger file correctly named sdimg_sce_
-                    //                        holderitem.SealedKeyFile = encsavefiles[ix];//bin file location
-                    //                        datitem.ListOfSaveItesm.Add(holderitem);
-                    //                    }
-                    //                    catch (Exception exfile)
-                    //                    {
-                    //                        Assets.Code.MessageBox.Show(exfile.Message);
-                    //                        return;
-                    //                    }
-                    //                }
-                    //            }
-                    //        }
-                    //        MainClass.savedatafileitems.Add(datitem);
-
-                    //    }
-
-
-
-                    //    main.CreateSaveDataView(MainClass.savedatafileitems, savecontentPanel,savescrollRect);
-                    //    Assets.Code.LoadingDialog.Close();
-                    //    return;
-                    //    //this works like a bomb now
-
-                    //}
-                    //else
-                    #endregion << Old No Longer Required >>
+                    if (Assets.Code.Data.SettingsData.GetSettingValue("EnableSaveDB", "Disabled") != "Enabled")
                     {
 
-                        if(Application.platform == RuntimePlatform.PS4)
+                        #region << Old No Longer Required >>
+                        if (Application.platform == RuntimePlatform.PS4)
+                        {
+                            Assets.Code.LoadingDialog.Show("Loading save files please wait ...");
+
+                            //SendMessageToPS4("Something broke 3");
+                            int UserId = 0;
+                            int.TryParse(MainClass.Get_UserId(), out UserId);
+                            string userDirectory = UserId.ToString("x");
+                            //SendMessageToPS4("Something broke "+userDirectory);
+                            //SendMessageToPS4("Loading saves");
+                            //you can get the userdirectory like this or ask the ps4 for it but this is just easier
+                            string[] files = System.IO.Directory.GetDirectories(@"/user/home/" + userDirectory + "/savedata/", "*", SearchOption.TopDirectoryOnly);
+                            string[] savemetafiles = System.IO.Directory.GetDirectories(@"/user/home/" + userDirectory + "/savedata_meta/user", "*", SearchOption.TopDirectoryOnly);
+
+                            MainClass.savedatafileitems = new List<MainClass.SaveDataMain>();
+
+                            for (int i = 0; i < files.Length; i++)
+                            {
+                                MainClass.SaveDataMain datitem = new MainClass.SaveDataMain();
+                                datitem.SaveFilePath = files[i];
+                                for (int x = 0; x < savemetafiles.Length; x++)
+                                {
+
+                                    string DirSaveName = new DirectoryInfo(datitem.SaveFilePath).Name;
+                                    string DirSaveMetaName = new DirectoryInfo(savemetafiles[x]).Name;
+                                    if (DirSaveName == DirSaveMetaName)//Directories match
+                                    {
+                                        datitem.SaveMetaFilePath = DirSaveMetaName;
+                                        datitem.TITLE = DirSaveMetaName;
+                                        //get all saveenc files in the savedir
+                                        string[] encsavefiles = System.IO.Directory.GetFiles(files[i], "*.bin", SearchOption.TopDirectoryOnly);//get all encyrption files
+                                        for (int ix = 0; ix < encsavefiles.Length; ix++)
+                                        {
+                                            try
+                                            {
+                                                //set the data inside
+                                                //sony was really cute left us the image in the meta path 
+                                                //sce_icon0png1
+                                                MainClass.SaveDataHolder holderitem = new MainClass.SaveDataHolder();
+                                                var allpngfiles = Directory.GetFiles(savemetafiles[x], "*.png", SearchOption.TopDirectoryOnly)
+                                                    .ToList();
+                                                if (allpngfiles.Count != 0)
+                                                {
+                                                    holderitem.ImageLocation = allpngfiles[0].ToString();
+                                                }
+                                                string binfname = Path.GetFileNameWithoutExtension(encsavefiles[ix]);//since we know its bin
+                                                holderitem.SaveDataFile = files[i] + "/sdimg_" + binfname;//is the bigger file correctly named sdimg_sce_
+                                                holderitem.SealedKeyFile = encsavefiles[ix];//bin file location
+                                                datitem.ListOfSaveItesm.Add(holderitem);
+                                            }
+                                            catch (Exception exfile)
+                                            {
+                                                Assets.Code.MessageBox.Show(exfile.Message);
+                                                return;
+                                            }
+                                        }
+                                    }
+                                }
+                                MainClass.savedatafileitems.Add(datitem);
+
+                            }
+
+
+
+                            main.CreateSaveDataView(MainClass.savedatafileitems, savecontentPanel, savescrollRect);
+                            Assets.Code.LoadingDialog.Close();
+                            return;
+                            //this works like a bomb now
+
+                        }
+                        else
+                        {
+                            string[] files = System.IO.Directory.GetDirectories(@"D:\Users\3deEchelon\Desktop\PS4\RE\Ps4 Save Data Backup\10000000\savedata", "*", SearchOption.TopDirectoryOnly);
+                            string[] savemetafiles = System.IO.Directory.GetDirectories(@"D:\Users\3deEchelon\Desktop\PS4\RE\Ps4 Save Data Backup\10000000\savedata_meta\user", "*", SearchOption.TopDirectoryOnly);
+
+
+
+                            for (int i = 0; i < files.Length; i++)
+                            {
+                                MainClass.SaveDataMain datitem = new MainClass.SaveDataMain();
+                                datitem.SaveFilePath = files[i];
+                                for (int x = 0; x < savemetafiles.Length; x++)
+                                {
+
+                                    string DirSaveName = new DirectoryInfo(datitem.SaveFilePath).Name;
+                                    string DirSaveMetaName = new DirectoryInfo(savemetafiles[x]).Name;
+                                    if (DirSaveName == DirSaveMetaName)//Directories match
+                                    {
+                                        datitem.SaveMetaFilePath = DirSaveMetaName;
+
+                                        var SaveInfo = Data.DataProcsessing.AppInfo.GetAppInfo(DirSaveMetaName);
+                                        string DisplayName = "";
+
+                                        var Title = SaveInfo.Find(x1 => x1.key == "TITLE");
+                                        if (Title != null)
+                                        {
+                                            DisplayName = Title.val + "(" + DirSaveMetaName + ")";
+                                        }
+                                        else
+                                        {
+                                            DisplayName = "unknown" + "(" + DirSaveMetaName + ")";
+                                        }
+                                        datitem.TITLE = DisplayName;
+                                        //get all saveenc files in the savedir
+                                        string[] encsavefiles = System.IO.Directory.GetFiles(files[i], "*.bin", SearchOption.TopDirectoryOnly);//get all encyrption files
+                                        for (int ix = 0; ix < encsavefiles.Length; ix++)
+                                        {
+                                            try
+                                            {
+                                                //set the data inside
+                                                //sony was really cute left us the image in the meta path 
+                                                //sce_icon0png1
+                                                MainClass.SaveDataHolder holderitem = new MainClass.SaveDataHolder();
+                                                holderitem.ImageLocation = savemetafiles[x] + "/sce_icon0png1";
+                                                string binfname = Path.GetFileNameWithoutExtension(encsavefiles[ix]);//since we know its bin
+                                                holderitem.SaveDataFile = files[i] + "/sdimg_" + binfname;//is the bigger file correctly named sdimg_sce_
+                                                holderitem.SealedKeyFile = encsavefiles[ix];//bin file location
+                                                datitem.ListOfSaveItesm.Add(holderitem);
+                                            }
+                                            catch (Exception exfile)
+                                            {
+                                                string errogolder = exfile.Message;
+                                            }
+                                        }
+                                    }
+                                }
+                                MainClass.savedatafileitems.Add(datitem);
+
+                            }
+                            main.CreateSaveDataView(MainClass.savedatafileitems, savecontentPanel, savescrollRect);
+                        }
+                        #endregion << Old No Longer Required >>
+                    }
+                    else
+                    {
+
+                        if (Application.platform == RuntimePlatform.PS4)
                         {
                             Assets.Code.LoadingDialog.Show("Loading save files\nplease wait ...");
                         }
@@ -132,7 +195,7 @@ namespace Assets.Code.Scenes
 
                             //does the savedataholder contain this save info already ?
                             var Found = MainClass.savedatafileitems.FirstOrDefault(x => x.SaveFilePath == SaveFileLocation + saves[i].title_id);
-                            if(Found != null)
+                            if (Found != null)
                             {
                                 continue;
                             }
@@ -142,19 +205,26 @@ namespace Assets.Code.Scenes
                             string DisplayName = "";
 
                             var Title = SaveInfo.Find(x => x.key == "TITLE");
-                            if(Title != null)
+                            if (Title != null)
                             {
                                 DisplayName = Title.val + "(" + saves[i].title_id + ")";
                             }
                             else
                             {
-                                if (PlayerPrefs.GetString("EnableChihiroAPI", "Enabled") == "Enabled")
+                                if (Assets.Code.Data.SettingsData.GetSettingValue("EnableChihiroAPI", "Enabled") == "Enabled")
                                 {
                                     //get data from chihiro
                                     var items = Wrapper.PS4_chihiro_API.GetGameInfoByTitleId(saves[i].title_id + "_00");
                                     if (items != null)
                                     {
-                                        DisplayName = items.TitleName + "(" + saves[i].title_id + ")";
+                                        if (items.TitleName != null)
+                                        {
+                                            DisplayName = items.TitleName + "(" + saves[i].title_id + ")";
+                                        }
+                                        else
+                                        {
+                                            DisplayName = "unknown" + "(" + saves[i].title_id + ")";
+                                        }
                                     }
                                     else
                                     {
@@ -181,10 +251,10 @@ namespace Assets.Code.Scenes
                                     //now we will do some things to ensure this works
                                     holderitem.ImageLocation = datitem.SaveMetaFilePath + "/sce_icon0png1";//sony saves the image in this file
 
-                                    if(!File.Exists(holderitem.ImageLocation))
+                                    if (!File.Exists(holderitem.ImageLocation))
                                     {
                                         //use the png file 
-                                        holderitem.ImageLocation = datitem.SaveMetaFilePath +"/"+ saves_with_id[ix].dir_name + "_icon0.png";
+                                        holderitem.ImageLocation = datitem.SaveMetaFilePath + "/" + saves_with_id[ix].dir_name + "_icon0.png";
                                     }
                                     if (File.Exists(holderitem.ImageLocation))
                                     {
@@ -193,7 +263,7 @@ namespace Assets.Code.Scenes
 
 
 
-                                    
+
 
                                     string binfname = saves_with_id[ix].dir_name;//easy stuff now
                                     holderitem.SaveDataFile = datitem.SaveFilePath + "/sdimg_" + binfname;

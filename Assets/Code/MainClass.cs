@@ -383,9 +383,10 @@ public class MainClass : MonoBehaviour
                         FreeUnjail(get_firmware());
                     }
 
-
-                    FreeFTP(); //DO FTP NOW THANKS BYE
-
+                    if (SettingsData.GetSettingValue("EnableFTPOnBoot", "Enabled") == "Enabled")
+                    {
+                        FreeFTP(); //DO FTP NOW THANKS BYE
+                    }
 
                     //now do freemount so we have full read write access 
                     FreeMount();
@@ -411,10 +412,17 @@ public class MainClass : MonoBehaviour
                 var IPAddress = GameObject.Find("txtIP");
                 if (IPAddress != null)
                 {
-                    StartCoroutine(GetLocalIPAddress(returnValue =>
+                    if (SettingsData.GetSettingValue("EnableFTPOnBoot", "Enabled") == "Enabled")
+                    {
+                        StartCoroutine(GetLocalIPAddress(returnValue =>
                     {
                         IPAddress.gameObject.GetComponent<Text>().text = returnValue;
                     }));
+                    }
+                    else
+                    {
+                        IPAddress.gameObject.GetComponent<Text>().text = "";
+                    }
                 }
                 FTPAddress = true;
             }
@@ -628,8 +636,12 @@ public class MainClass : MonoBehaviour
             objetc = Instantiate(FileSaveFab, savecontentPanel);
             Text textholder = objetc.GetComponentInChildren<Text>();
 
-            textholder.text = SaveDirs[i].TITLE;
 
+            textholder.text = SaveDirs[i].TITLE;
+            if (string.IsNullOrEmpty(SaveDirs[i].TITLE))
+            {
+                textholder.text = new DirectoryInfo(SaveDirs[i].SaveFilePath).Name;
+            }
             UnityEngine.UI.Image[] HolderforPic = objetc.GetComponentsInChildren<UnityEngine.UI.Image>();
             if (SaveDirs[i].ListOfSaveItesm.Count != 0)
             {
@@ -689,8 +701,6 @@ public class MainClass : MonoBehaviour
     }
 
     List<CustomTrophyHolder> lstTrophyFiles = new List<CustomTrophyHolder>();
-
-
 
     void CreateTrophyView(List<string> TrpFiles = null, List<string> IniFiles = null)
     {
@@ -939,7 +949,7 @@ public class MainClass : MonoBehaviour
         }
     }
 
-    void CreateSaveDataView(List<string> SaveDirs = null)
+    public void CreateSaveDataView(List<string> SaveDirs = null)
     {
         SaveItemGameObjectList.Clear();
         GameObject objetc = null;
@@ -2042,7 +2052,6 @@ public class MainClass : MonoBehaviour
                     }
                     return;
                 }
-
                 else if (CurrentSCreen == GameScreen.PKGInfoScreen)
                 {
                     //public static Utility.AppLauncher LaunchApp(string titleId, string arg = "", EventMonitor.AppAttr appAttr = EventMonitor.AppAttr.None)
@@ -2090,12 +2099,46 @@ public class MainClass : MonoBehaviour
 
                     if (ddTrophy.value != 0)
                     {
-                        //spesific trophy 
-                        int TrophyId = -1;
-                        int.TryParse(ddTrophy.options[ddTrophy.value].text.ToString()[1].ToString(), out TrophyId);
-                        if (TrophyId != -1)
+
+                        if (SettingsData.GetSettingValue("EnableTrophyDBUnlocking", "Enabled") == "Enabled")
                         {
-                            Assets.Code.Wrapper.TrophyUtil.UnlockSpesificTrophy(TrophyId);
+                            //spesific trophy 
+                            int TrophyId = -1;
+                            int.TryParse(ddTrophy.options[ddTrophy.value].text.ToString()[1].ToString(), out TrophyId);
+                            if (TrophyId != -1)
+                            {
+                                Assets.Code.Wrapper.TrophyUtil.UnlockSpesificTrophy(TrophyId);
+                            }
+                        }
+                        else
+                        {
+                            Assets.Code.MessageBox.Show("Please do not use this for now\nShould be working in next release");
+                            return;
+                            var trophyitem = lstTrophyFiles[CurrentItem];
+                            string MetaDataLocation = "";
+                            var _MetaInfo = trophyitem.AppInfo.Find(x => x.key == "TITLE_ID");
+                            if (_MetaInfo != null)
+                            {
+                                MetaDataLocation = "/system_data/priv/appmeta/" + _MetaInfo.val.TrimEnd() + @"/nptitle.dat";
+                            }
+
+                            PKG.SceneRelated.NP_Title npdataholder = new PKG.SceneRelated.NP_Title();
+                            npdataholder = new PS4_Tools.PKG.SceneRelated.NP_Title(MetaDataLocation);
+
+                            int UserId = 0;
+
+                            if (Application.platform == RuntimePlatform.PS4)
+                            {
+                                int.TryParse(GetUserId(), out UserId);
+                            }
+
+                            string userDirectory = UserId.ToString("x");
+
+                            PS4_Tools.Trophy_File.Unlock_All_Title_Id(npdataholder.Nptitle, "/user/home/" + userDirectory + "/trophy/db/trophy_local.db", "/user/home/" + userDirectory + "/trophy/data/sce_trop/trpsummary.dat");
+                            if (Application.platform == RuntimePlatform.PS4)
+                            {
+                                SendMessageToPS4("Unlocked all for " + npdataholder.Nptitle + " via DB");
+                            }
                         }
                     }
                     else
@@ -2122,23 +2165,49 @@ public class MainClass : MonoBehaviour
                     try
                     {
 
-                        var settingvalue = PlayerPrefs.GetString(settingItem.SettingPref, "Enabled");
+                        if (settingItem.SettingName == "Credits")
+                        {
+                            if (Application.platform == RuntimePlatform.PS4)
+                            {
+
+                                //we are redoing this now
+                                Assets.Code.Wrapper.Util.ShowMessageDialog(@"A huge thanks to every developer who contributed to the dev wiki! 
+Your work made alot of this possible.
+
+Thanks to:
+The Open Orbis Team
+ChendoChap
+Specter
+Diwidog
+LightningMods
+theorywrong
+DefaultDNB
+DarkElement
+and many many more
+");
+                                return;
+                            }
+                        }
+
+                        var settingvalue = Assets.Code.Data.SettingsData.GetSettingValue(settingItem.SettingPref, "Enabled");
                         if (settingvalue == "Enabled")
                         {
-                            PlayerPrefs.SetString(settingItem.SettingPref, "Disabled");
+                            Assets.Code.Data.SettingsData.SetSettingValue(settingItem.SettingPref, "Disabled");
+                            //PlayerPrefs.SetString(settingItem.SettingPref, "Disabled");
                         }
                         else
                         {
-                            PlayerPrefs.SetString(settingItem.SettingPref, "Enabled");
+                            Assets.Code.Data.SettingsData.SetSettingValue(settingItem.SettingPref, "Enabled");
+                            //PlayerPrefs.SetString(settingItem.SettingPref, "Enabled");
                         }
-                        PlayerPrefs.Save();
+                        //PlayerPrefs.Save();
 
                         //Modify item in view
 
 
                         Transform txtHolderSettingValue = SettingsItemGameObjectList[CurrentItem].transform.Find("Setting Value");
                         Text SettingValue = txtHolderSettingValue.GetComponent<Text>();
-                        SettingValue.text = PlayerPrefs.GetString(settingItem.SettingPref, "Enabled");
+                        SettingValue.text = Assets.Code.Data.SettingsData.GetSettingValue(settingItem.SettingPref, "Enabled");
                         //CreateSettingsView(Assets.Code.Data.SettingsData.GetAllSettings());
                     }
                     catch (Exception ex)
@@ -2161,8 +2230,8 @@ public class MainClass : MonoBehaviour
                     PKGCanvas.gameObject.SetActive(false);//hide PKG Screen
                     CanvasSaveData.gameObject.SetActive(false);//Hide Save Screen
                     SettingsCanvas.gameObject.SetActive(false);
+                    UsbCanvas.gameObject.SetActive(false);
                     CurrentSCreen = GameScreen.MainScreen;
-
 
                     return;
                 }
@@ -2214,7 +2283,7 @@ public class MainClass : MonoBehaviour
                 if (CurrentSCreen == GameScreen.USBPKGMenu)
                 {
                     MainMenu.gameObject.SetActive(true);//Hide main mene
-                    usbcontentPanel.gameObject.SetActive(false);//Show Save Screen
+                    UsbCanvas.gameObject.SetActive(false);//Show Save Screen
                     PKGSelectionCanvas.gameObject.SetActive(false);//hide PKG Screen
                     SaveSelectionCanvas.gameObject.SetActive(false);//hide PKG Screen
                     CurrentSCreen = GameScreen.MainScreen;
@@ -2260,9 +2329,11 @@ public class MainClass : MonoBehaviour
                     //else
                     {
 
-                        if (Application.platform == RuntimePlatform.PS4)
-                            Assets.Code.MessageBox.Show("To properly use this function you need to use a hen/mira with savedata patches\nOr a save mounter\nPathces are still being ported");
-
+                        if (SettingsData.GetSettingValue("EnableSaveDataWarning", "Enabled") == "Enabled")
+                        {
+                            if (Application.platform == RuntimePlatform.PS4)
+                                Assets.Code.MessageBox.Show("To properly use this function you need to use a hen/mira with savedata patches\nOr a save mounter\n\nBuilt in Pathces are still being ported");
+                        }
                         Assets.Code.Scenes.SaveData sd = new Assets.Code.Scenes.SaveData();
                         Assets.Code.Scenes.SaveData.Load load = new Assets.Code.Scenes.SaveData.Load();
                         load.ToDisplay(MainMenu, CanvasSaveData, PKGSelectionCanvas, savecontentPanel, savescrollRect, this);
@@ -2314,7 +2385,6 @@ public class MainClass : MonoBehaviour
                         SaveOptionsList.SetActive(false);
                     }
                 }
-
                 if (CurrentSCreen == GameScreen.MainScreen)
                 {
                     //not going to allow this now since we want to do a small release first
@@ -2331,14 +2401,18 @@ public class MainClass : MonoBehaviour
                     try
                     {
                         //default to this so we can test locally
-                        Assets.Code.YesNoDialog.YesNoRessult result = Assets.Code.YesNoDialog.YesNoRessult.Yes;
-                        if (Application.platform == RuntimePlatform.PS4)
+                        var settingvalue = Assets.Code.Data.SettingsData.GetSettingValue("EnableTrophyUtilWarning", "Enabled");
+                        if (settingvalue == "Enabled")
                         {
-                            result = Assets.Code.YesNoDialog.Show("This is still a WIP\nWhen unlocking a trophy and mounting another one you might be kicked out to the user select screen\nJust run the app again for that game it will work on the first mount\n\n Do you understand ?");
-                        }
-                        if (result != Assets.Code.YesNoDialog.YesNoRessult.Yes)
-                        {
-                            return;
+                            Assets.Code.YesNoDialog.YesNoRessult result = Assets.Code.YesNoDialog.YesNoRessult.Yes;
+                            if (Application.platform == RuntimePlatform.PS4)
+                            {
+                                result = Assets.Code.YesNoDialog.Show("This is still a WIP\nWhen unlocking a trophy and mounting another one you might be kicked out to the user select screen\nJust run the app again for that game it will work on the first mount\n\nDo you understand ?\n(You can disable this notification from settings)");
+                            }
+                            if (result != Assets.Code.YesNoDialog.YesNoRessult.Yes)
+                            {
+                                return;
+                            }
                         }
                         //here is to the new one 
                         //int UserId = 0;
@@ -2880,7 +2954,7 @@ public class MainClass : MonoBehaviour
                 if (CurrentSCreen == GameScreen.MainScreen)
                 {
 
-
+                    CurrentItem = 0;//top one please
 
                     if (SettingsCanvas.gameObject.activeSelf == false)
                     {
@@ -2906,25 +2980,7 @@ public class MainClass : MonoBehaviour
 
 
 
-                    if (Application.platform == RuntimePlatform.PS4)
-                    {
 
-                        //we are redoing this now
-                        Assets.Code.Wrapper.Util.ShowMessageDialog(@"A huge thanks to every developer who contributed to the dev wiki! 
-Your work made alot of this possible.
-
-Thanks to:
-The Open Orbis Team
-ChendoChap
-Specter
-Diwidog
-LightningMods
-theorywrong
-DefaultDNB
-DarkElement
-and many many more
-");
-                    }
                     ////Still desiding to either show a pannel or not
                     //if (CreditPanel.activeSelf == false)
                     //{
@@ -3040,7 +3096,7 @@ and many many more
                                     }
                                 }
 
-                              
+
                             }
                             else
                             {
@@ -3087,8 +3143,8 @@ and many many more
                                         SaveFilesMounted = true;
                                     }
                                 }
-                                
-                               
+
+
                             }
                         }
                     }
@@ -3759,8 +3815,8 @@ and many many more
                 else if (CurrentSCreen == GameScreen.MainScreen)
                 {
 
-
-                    Install_Patches(get_firmware());
+                    //do not show this for release Patches still need to be applied
+                    //Install_Patches(get_firmware());
 
                     FreeMount();
 

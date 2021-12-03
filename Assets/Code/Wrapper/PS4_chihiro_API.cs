@@ -66,29 +66,31 @@ namespace Assets.Code.Wrapper
                     //Unity not playing fair so ill make a c function
                     //var aesCrypto = new System.Security.Cryptography.AesCryptoServiceProvider();
                     //X509Certificate2 rootcert = new X509Certificate2("Assets/Scripts/adminClient.p12", "xxxxxx");
-
-                    //using (UnityWebRequest www = UnityWebRequest.Get(URL))
-                    //{
-                    //    www.SetRequestHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:69.0) Gecko/20100101 Firefox/69.0");
-                    //    var request = www.SendWebRequest();
-
-                    //    while (!request.isDone)
-                    //    {
-                    //        Debug.Log("Download Stat: " + request.progress);
-                    //    }
-                    //    if (www.isNetworkError || www.isHttpError)
-                    //    {
-                    //        if (Application.platform == RuntimePlatform.PS4)
-                    //        {
-                    //            Util.SendMessageToPS4(www.error);
-                    //        }
-                    //        Debug.Log(www.error);
-                    //    }
-                    //    else
-                    //    {
-                    string json = DownloadString(URL);
-                    Assets.Code.Models.PS4_chihiro_model.PS4_chihiro_model_item myDeserializedClass = JsonConvert.DeserializeObject<Assets.Code.Models.PS4_chihiro_model.PS4_chihiro_model_item>(json);
-                    rntItem = myDeserializedClass;
+                    
+                    using (UnityWebRequest www = UnityWebRequest.Get(URL))
+                    {
+                        www.SetRequestHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:69.0) Gecko/20100101 Firefox/69.0");
+                        var request = www.SendWebRequest();
+                        
+                        while (!request.isDone)
+                        {
+                            Debug.Log("Download Stat: " + request.progress);
+                        }
+                        if (www.isNetworkError || www.isHttpError)
+                        {
+                            if (Application.platform == RuntimePlatform.PS4)
+                            {
+                                Util.SendMessageToPS4(www.error);
+                            }
+                            Debug.Log(www.error);
+                        }
+                        else
+                        {
+                            string json = request.webRequest.downloadHandler.text; //DownloadString(URL);
+                            Assets.Code.Models.PS4_chihiro_model.PS4_chihiro_model_item myDeserializedClass = JsonConvert.DeserializeObject<Assets.Code.Models.PS4_chihiro_model.PS4_chihiro_model_item>(json);
+                            rntItem = myDeserializedClass;
+                        }
+                    }
                     //string savePath = string.Format("{0}/{1}.pdb", Application.persistentDataPath, file_name);
                     //System.IO.File.WriteAllText(savePath, www.downloadHandler.text);
 

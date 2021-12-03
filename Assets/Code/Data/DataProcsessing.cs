@@ -492,7 +492,6 @@ Where trophy_title_id = '" + trophy_title_id + "'";
 
                 return saves;
             }
-
             public static List<Models.Trophy_flag> GetAllTrophyFlags(string trophy_title_id)
             {
                 List<Models.Trophy_flag> saves = new List<Models.Trophy_flag>();
