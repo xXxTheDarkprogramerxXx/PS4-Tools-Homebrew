@@ -38,7 +38,6 @@ public class MainClass : MonoBehaviour
     private static extern string KernelGetOpenPsId();
     [DllImport("universal")]
     private static extern int UnlockTrophies(string NPComID);
-
     [DllImport("universal")]
     [return: MarshalAs(UnmanagedType.LPStr)]
     private static extern string GetUsername();
@@ -2100,7 +2099,7 @@ public class MainClass : MonoBehaviour
                     if (ddTrophy.value != 0)
                     {
 
-                        if (SettingsData.GetSettingValue("EnableTrophyDBUnlocking", "Enabled") == "Enabled")
+                        if (SettingsData.GetSettingValue("EnableTrophyDBUnlocking", "Enabled") != "Enabled")
                         {
                             //spesific trophy 
                             int TrophyId = -1;
@@ -2333,6 +2332,12 @@ and many many more
                         {
                             if (Application.platform == RuntimePlatform.PS4)
                                 Assets.Code.MessageBox.Show("To properly use this function you need to use a hen/mira with savedata patches\nOr a save mounter\n\nBuilt in Pathces are still being ported");
+                        }
+
+                        if(Application.platform == RuntimePlatform.PS4)
+                        {
+                            //this doesn;t work in unity
+                            //Assets.Code.Wrapper.PayloadWrapper.LaunchPs4Debug();
                         }
                         Assets.Code.Scenes.SaveData sd = new Assets.Code.Scenes.SaveData();
                         Assets.Code.Scenes.SaveData.Load load = new Assets.Code.Scenes.SaveData.Load();
@@ -3051,7 +3056,8 @@ and many many more
 
                                 //thanks to our new DB here you go
                                 string fingerpirnt = Assets.Code.Wrapper.pstools_api.GetGameInfoByTitleId(saveitem.TitleId.Replace("_00", ""));
-                                if (fingerpirnt.Replace("\"", "") == "")
+                                //SendMessageToPS4(fingerpirnt);
+                                if (false)
                                 {
                                     int savetest = MountSaveData(Path.GetFileName(saveitem.SaveFilePath), fingerpirnt.Replace("\"", ""));
                                     if (savetest != 0)
@@ -3076,7 +3082,7 @@ and many many more
                                 else
                                 {
                                     //hope we have patches
-                                    int savetest = MountSaveData(Path.GetFileName(saveitem.SaveFilePath), "294a5ed06db170618f2eed8c424b9d828879c080cc66fbc4864f69e974deb856");
+                                    int savetest = MountSaveData(Path.GetFileName(saveitem.SaveFilePath), "0000000000000000000000000000000000000000000000000000000000000000");
                                     if (savetest != 0)
                                     {
                                         if (savetest == -2137063421)
@@ -3103,7 +3109,7 @@ and many many more
                                 //we only want the one 
                                 var saveitem = savedatafileitems[CurrentItem];
                                 string fingerpirnt = Assets.Code.Wrapper.pstools_api.GetGameInfoByTitleId(saveitem.TitleId.Replace("_00", ""));
-                                if (fingerpirnt.Replace("\"", "") == "")
+                                if (false)
                                 {
                                     int savetest = MountSaveData_Path(Path.GetFileName(saveitem.SaveFilePath), Path.GetFileName(saveitem.ListOfSaveItesm[ddSave.value - 1].SaveDataFile).Replace("sdimg_", ""), fingerpirnt.Replace("\"", ""));
                                     if (savetest != 0)
@@ -3125,7 +3131,7 @@ and many many more
                                 }
                                 else
                                 {
-                                    int savetest = MountSaveData_Path(Path.GetFileName(saveitem.SaveFilePath), Path.GetFileName(saveitem.ListOfSaveItesm[ddSave.value - 1].SaveDataFile).Replace("sdimg_", ""), "294a5ed06db170618f2eed8c424b9d828879c080cc66fbc4864f69e974deb856");
+                                    int savetest = MountSaveData_Path(Path.GetFileName(saveitem.SaveFilePath), Path.GetFileName(saveitem.ListOfSaveItesm[ddSave.value - 1].SaveDataFile).Replace("sdimg_", ""), "0000000000000000000000000000000000000000000000000000000000000000");
                                     if (savetest != 0)
                                     {
                                         if (savetest == -2137063421)
@@ -3731,7 +3737,6 @@ and many many more
                     }
                     return;
                 }
-
                 else if (CurrentSCreen == GameScreen.TrophyInfoScreen)
                 {
                     var ddTrophyHolder = GameObject.Find("ddTrophy");
@@ -3745,7 +3750,6 @@ and many many more
                     }
                     return;
                 }
-
                 else if (CurrentSCreen == GameScreen.TrophyScreen)
                 {
                     if (CurrentItem < TrpItemGameObjectList.Count - 1)
@@ -3815,8 +3819,16 @@ and many many more
                 else if (CurrentSCreen == GameScreen.MainScreen)
                 {
 
+                    //string processlist = "";
+                    //System.Diagnostics.Process[] processCollection = System.Diagnostics.Process.GetProcesses();
+                    //foreach (System.Diagnostics.Process p in processCollection)
+                    //{
+                    //    processlist += "Name:"+ p.ProcessName + "PID:"+p.Id + "\n";
+                    //}
+                    //Assets.Code.MessageBox.Show(processlist);
+
                     //do not show this for release Patches still need to be applied
-                    //Install_Patches(get_firmware());
+                    Install_Patches(get_firmware());
 
                     FreeMount();
 

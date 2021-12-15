@@ -167,7 +167,7 @@ namespace Assets.Code.Scenes
 
                         if (Application.platform == RuntimePlatform.PS4)
                         {
-                            Assets.Code.LoadingDialog.Show("Loading save files\nplease wait ...");
+                            Assets.Code.LoadingDialog.Show("Loading save files please wait ...");
                         }
 
                         //Clean the SaveData Loader

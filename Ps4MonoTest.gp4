@@ -1,0 +1,186 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<psproject fmt="gp4" version="1000">
+  <volume>
+    <volume_type>pkg_ps4_app</volume_type>
+    <volume_id>PS4VOLUME</volume_id>
+    <volume_ts>2021-12-03 13:51:27</volume_ts>
+    <package content_id="ED1633-XDPX20004_00-0000000000000000" passcode="00000000000000000000000000000000" storage_type="bd50" app_type="full"/>
+    <chunk_info chunk_count="1" scenario_count="1">
+      <chunks>
+        <chunk id="0" layer_no="0" label="Chunk #0"/>
+      </chunks>
+      <scenarios default_id="0">
+        <scenario id="0" type="sp" initial_chunk_count="1" label="Scenario #0">0</scenario>
+      </scenarios>
+    </chunk_info>
+  </volume>
+  <files img_no="0">
+    <file targ_path="sce_module/libc.prx" orig_path="PS4Mono\sce_module\libc.prx"/>
+    <file targ_path="sce_module/libSceAudioLatencyEstimation.prx" orig_path="PS4Mono\sce_module\libSceAudioLatencyEstimation.prx"/>
+    <file targ_path="sce_module/libSceFace.prx" orig_path="PS4Mono\sce_module\libSceFace.prx"/>
+    <file targ_path="sce_module/libSceFaceTracker.prx" orig_path="PS4Mono\sce_module\libSceFaceTracker.prx"/>
+    <file targ_path="sce_module/libSceFios2.prx" orig_path="PS4Mono\sce_module\libSceFios2.prx"/>
+    <file targ_path="sce_module/libSceHand.prx" orig_path="PS4Mono\sce_module\libSceHand.prx"/>
+    <file targ_path="sce_module/libSceHandTracker.prx" orig_path="PS4Mono\sce_module\libSceHandTracker.prx"/>
+    <file targ_path="sce_module/libSceHeadTracker.prx" orig_path="PS4Mono\sce_module\libSceHeadTracker.prx"/>
+    <file targ_path="sce_module/libSceJobManager.prx" orig_path="PS4Mono\sce_module\libSceJobManager.prx"/>
+    <file targ_path="sce_module/libSceNpToolkit2.prx" orig_path="PS4Mono\sce_module\libSceNpToolkit2.prx"/>
+    <file targ_path="sce_module/libSceS3DConversion.prx" orig_path="PS4Mono\sce_module\libSceS3DConversion.prx"/>
+    <file targ_path="sce_module/libSceSmart.prx" orig_path="PS4Mono\sce_module\libSceSmart.prx"/>
+    <file targ_path="sce_sys/icon0.png" orig_path="PS4Mono\sce_sys\icon0.png"/>
+    <file targ_path="sce_sys/param.sfo" orig_path="PS4Mono\sce_sys\param.sfo"/>
+    <file targ_path="sce_sys/pic0.png" orig_path="PS4Mono\sce_sys\pic0.png"/>
+    <file targ_path="sce_sys/pic1.png" orig_path="PS4Mono\sce_sys\pic1.png"/>
+    <file targ_path="sce_sys/pronunciation.sig" orig_path="PS4Mono\sce_sys\pronunciation.sig"/>
+    <file targ_path="sce_sys/pronunciation.xml" orig_path="PS4Mono\sce_sys\pronunciation.xml"/>
+    <file targ_path="sce_sys/save_data.png" orig_path="PS4Mono\sce_sys\save_data.png"/>
+    <file targ_path="sce_sys/shareparam.json" orig_path="PS4Mono\sce_sys\shareparam.json"/>
+    <file targ_path="archive.psarc" orig_path="PS4Mono\archive.psarc"/>
+    <file targ_path="archive.txt" orig_path="PS4Mono\archive.txt"/>
+    <file targ_path="configuration.ps4path" orig_path="PS4Mono\configuration.ps4path"/>
+    <file targ_path="eboot.bin" orig_path="PS4Mono\eboot.bin"/>
+    <file targ_path="PS4Mono.bat" orig_path="PS4Mono\PS4Mono.bat"/>
+    <file targ_path="Media/boot.config" orig_path="PS4Mono\Media\boot.config"/>
+    <file targ_path="Media/globalgamemanagers" orig_path="PS4Mono\Media\globalgamemanagers"/>
+    <file targ_path="Media/globalgamemanagers.assets" orig_path="PS4Mono\Media\globalgamemanagers.assets"/>
+    <file targ_path="Media/globalgamemanagers.assets.resS" orig_path="PS4Mono\Media\globalgamemanagers.assets.resS"/>
+    <file targ_path="Media/Managed/Assembly-CSharp.dll" orig_path="PS4Mono\Media\Managed\Assembly-CSharp.dll"/>
+    <file targ_path="Media/Managed/BigInteger.dll" orig_path="PS4Mono\Media\Managed\BigInteger.dll"/>
+    <file targ_path="Media/Managed/DotNetZip.dll" orig_path="PS4Mono\Media\Managed\DotNetZip.dll"/>
+    <file targ_path="Media/Managed/ExCSS.Unity.dll" orig_path="PS4Mono\Media\Managed\ExCSS.Unity.dll"/>
+    <file targ_path="Media/Managed/GameArchives.dll" orig_path="PS4Mono\Media\Managed\GameArchives.dll"/>
+    <file targ_path="Media/Managed/HtmlAgilityPack.dll" orig_path="PS4Mono\Media\Managed\HtmlAgilityPack.dll"/>
+    <file targ_path="Media/Managed/ICallSummary.txt" orig_path="PS4Mono\Media\Managed\ICallSummary.txt"/>
+    <file targ_path="Media/Managed/ICSharpCode.SharpZipLib.dll" orig_path="PS4Mono\Media\Managed\ICSharpCode.SharpZipLib.dll"/>
+    <file targ_path="Media/Managed/mono/2.0/machine.config" orig_path="PS4Mono\Media\Managed\mono\2.0\machine.config"/>
+    <file targ_path="Media/Managed/Mono.Data.Tds.dll" orig_path="PS4Mono\Media\Managed\Mono.Data.Tds.dll"/>
+    <file targ_path="Media/Managed/Mono.Posix.dll" orig_path="PS4Mono\Media\Managed\Mono.Posix.dll"/>
+    <file targ_path="Media/Managed/Mono.Security.dll" orig_path="PS4Mono\Media\Managed\Mono.Security.dll"/>
+    <file targ_path="Media/Managed/monoTest.dll" orig_path="PS4Mono\Media\Managed\monoTest.dll"/>
+    <file targ_path="Media/Managed/mscorlib.dll" orig_path="PS4Mono\Media\Managed\mscorlib.dll"/>
+    <file targ_path="Media/Managed/Newtonsoft.Json.dll" orig_path="PS4Mono\Media\Managed\Newtonsoft.Json.dll"/>
+    <file targ_path="Media/Managed/PARAM.SFO.dll" orig_path="PS4Mono\Media\Managed\PARAM.SFO.dll"/>
+    <file targ_path="Media/Managed/PS4_Tools.dll" orig_path="PS4Mono\Media\Managed\PS4_Tools.dll"/>
+    <file targ_path="Media/Managed/System.Configuration.dll" orig_path="PS4Mono\Media\Managed\System.Configuration.dll"/>
+    <file targ_path="Media/Managed/System.Core.dll" orig_path="PS4Mono\Media\Managed\System.Core.dll"/>
+    <file targ_path="Media/Managed/System.Data.dll" orig_path="PS4Mono\Media\Managed\System.Data.dll"/>
+    <file targ_path="Media/Managed/System.Data.SQLite.dll" orig_path="PS4Mono\Media\Managed\System.Data.SQLite.dll"/>
+    <file targ_path="Media/Managed/System.dll" orig_path="PS4Mono\Media\Managed\System.dll"/>
+    <file targ_path="Media/Managed/System.Drawing.dll" orig_path="PS4Mono\Media\Managed\System.Drawing.dll"/>
+    <file targ_path="Media/Managed/System.EnterpriseServices.dll" orig_path="PS4Mono\Media\Managed\System.EnterpriseServices.dll"/>
+    <file targ_path="Media/Managed/System.Runtime.Serialization.dll" orig_path="PS4Mono\Media\Managed\System.Runtime.Serialization.dll"/>
+    <file targ_path="Media/Managed/System.Security.dll" orig_path="PS4Mono\Media\Managed\System.Security.dll"/>
+    <file targ_path="Media/Managed/System.Transactions.dll" orig_path="PS4Mono\Media\Managed\System.Transactions.dll"/>
+    <file targ_path="Media/Managed/System.Xml.dll" orig_path="PS4Mono\Media\Managed\System.Xml.dll"/>
+    <file targ_path="Media/Managed/UnityEngine.AccessibilityModule.dll" orig_path="PS4Mono\Media\Managed\UnityEngine.AccessibilityModule.dll"/>
+    <file targ_path="Media/Managed/UnityEngine.AccessibilityModule.dll.mdb" orig_path="PS4Mono\Media\Managed\UnityEngine.AccessibilityModule.dll.mdb"/>
+    <file targ_path="Media/Managed/UnityEngine.AIModule.dll" orig_path="PS4Mono\Media\Managed\UnityEngine.AIModule.dll"/>
+    <file targ_path="Media/Managed/UnityEngine.AIModule.dll.mdb" orig_path="PS4Mono\Media\Managed\UnityEngine.AIModule.dll.mdb"/>
+    <file targ_path="Media/Managed/UnityEngine.AnimationModule.dll" orig_path="PS4Mono\Media\Managed\UnityEngine.AnimationModule.dll"/>
+    <file targ_path="Media/Managed/UnityEngine.AnimationModule.dll.mdb" orig_path="PS4Mono\Media\Managed\UnityEngine.AnimationModule.dll.mdb"/>
+    <file targ_path="Media/Managed/UnityEngine.ARModule.dll" orig_path="PS4Mono\Media\Managed\UnityEngine.ARModule.dll"/>
+    <file targ_path="Media/Managed/UnityEngine.ARModule.dll.mdb" orig_path="PS4Mono\Media\Managed\UnityEngine.ARModule.dll.mdb"/>
+    <file targ_path="Media/Managed/UnityEngine.AudioModule.dll" orig_path="PS4Mono\Media\Managed\UnityEngine.AudioModule.dll"/>
+    <file targ_path="Media/Managed/UnityEngine.AudioModule.dll.mdb" orig_path="PS4Mono\Media\Managed\UnityEngine.AudioModule.dll.mdb"/>
+    <file targ_path="Media/Managed/UnityEngine.ClothModule.dll" orig_path="PS4Mono\Media\Managed\UnityEngine.ClothModule.dll"/>
+    <file targ_path="Media/Managed/UnityEngine.ClothModule.dll.mdb" orig_path="PS4Mono\Media\Managed\UnityEngine.ClothModule.dll.mdb"/>
+    <file targ_path="Media/Managed/UnityEngine.CoreModule.dll" orig_path="PS4Mono\Media\Managed\UnityEngine.CoreModule.dll"/>
+    <file targ_path="Media/Managed/UnityEngine.CoreModule.dll.mdb" orig_path="PS4Mono\Media\Managed\UnityEngine.CoreModule.dll.mdb"/>
+    <file targ_path="Media/Managed/UnityEngine.CrashReportingModule.dll" orig_path="PS4Mono\Media\Managed\UnityEngine.CrashReportingModule.dll"/>
+    <file targ_path="Media/Managed/UnityEngine.CrashReportingModule.dll.mdb" orig_path="PS4Mono\Media\Managed\UnityEngine.CrashReportingModule.dll.mdb"/>
+    <file targ_path="Media/Managed/UnityEngine.DirectorModule.dll" orig_path="PS4Mono\Media\Managed\UnityEngine.DirectorModule.dll"/>
+    <file targ_path="Media/Managed/UnityEngine.DirectorModule.dll.mdb" orig_path="PS4Mono\Media\Managed\UnityEngine.DirectorModule.dll.mdb"/>
+    <file targ_path="Media/Managed/UnityEngine.dll" orig_path="PS4Mono\Media\Managed\UnityEngine.dll"/>
+    <file targ_path="Media/Managed/UnityEngine.dll.mdb" orig_path="PS4Mono\Media\Managed\UnityEngine.dll.mdb"/>
+    <file targ_path="Media/Managed/UnityEngine.GameCenterModule.dll" orig_path="PS4Mono\Media\Managed\UnityEngine.GameCenterModule.dll"/>
+    <file targ_path="Media/Managed/UnityEngine.GameCenterModule.dll.mdb" orig_path="PS4Mono\Media\Managed\UnityEngine.GameCenterModule.dll.mdb"/>
+    <file targ_path="Media/Managed/UnityEngine.GridModule.dll" orig_path="PS4Mono\Media\Managed\UnityEngine.GridModule.dll"/>
+    <file targ_path="Media/Managed/UnityEngine.GridModule.dll.mdb" orig_path="PS4Mono\Media\Managed\UnityEngine.GridModule.dll.mdb"/>
+    <file targ_path="Media/Managed/UnityEngine.ImageConversionModule.dll" orig_path="PS4Mono\Media\Managed\UnityEngine.ImageConversionModule.dll"/>
+    <file targ_path="Media/Managed/UnityEngine.ImageConversionModule.dll.mdb" orig_path="PS4Mono\Media\Managed\UnityEngine.ImageConversionModule.dll.mdb"/>
+    <file targ_path="Media/Managed/UnityEngine.IMGUIModule.dll" orig_path="PS4Mono\Media\Managed\UnityEngine.IMGUIModule.dll"/>
+    <file targ_path="Media/Managed/UnityEngine.IMGUIModule.dll.mdb" orig_path="PS4Mono\Media\Managed\UnityEngine.IMGUIModule.dll.mdb"/>
+    <file targ_path="Media/Managed/UnityEngine.InputModule.dll" orig_path="PS4Mono\Media\Managed\UnityEngine.InputModule.dll"/>
+    <file targ_path="Media/Managed/UnityEngine.InputModule.dll.mdb" orig_path="PS4Mono\Media\Managed\UnityEngine.InputModule.dll.mdb"/>
+    <file targ_path="Media/Managed/UnityEngine.JSONSerializeModule.dll" orig_path="PS4Mono\Media\Managed\UnityEngine.JSONSerializeModule.dll"/>
+    <file targ_path="Media/Managed/UnityEngine.JSONSerializeModule.dll.mdb" orig_path="PS4Mono\Media\Managed\UnityEngine.JSONSerializeModule.dll.mdb"/>
+    <file targ_path="Media/Managed/UnityEngine.Networking.dll" orig_path="PS4Mono\Media\Managed\UnityEngine.Networking.dll"/>
+    <file targ_path="Media/Managed/UnityEngine.ParticlesLegacyModule.dll" orig_path="PS4Mono\Media\Managed\UnityEngine.ParticlesLegacyModule.dll"/>
+    <file targ_path="Media/Managed/UnityEngine.ParticlesLegacyModule.dll.mdb" orig_path="PS4Mono\Media\Managed\UnityEngine.ParticlesLegacyModule.dll.mdb"/>
+    <file targ_path="Media/Managed/UnityEngine.ParticleSystemModule.dll" orig_path="PS4Mono\Media\Managed\UnityEngine.ParticleSystemModule.dll"/>
+    <file targ_path="Media/Managed/UnityEngine.ParticleSystemModule.dll.mdb" orig_path="PS4Mono\Media\Managed\UnityEngine.ParticleSystemModule.dll.mdb"/>
+    <file targ_path="Media/Managed/UnityEngine.PerformanceReportingModule.dll" orig_path="PS4Mono\Media\Managed\UnityEngine.PerformanceReportingModule.dll"/>
+    <file targ_path="Media/Managed/UnityEngine.PerformanceReportingModule.dll.mdb" orig_path="PS4Mono\Media\Managed\UnityEngine.PerformanceReportingModule.dll.mdb"/>
+    <file targ_path="Media/Managed/UnityEngine.Physics2DModule.dll" orig_path="PS4Mono\Media\Managed\UnityEngine.Physics2DModule.dll"/>
+    <file targ_path="Media/Managed/UnityEngine.Physics2DModule.dll.mdb" orig_path="PS4Mono\Media\Managed\UnityEngine.Physics2DModule.dll.mdb"/>
+    <file targ_path="Media/Managed/UnityEngine.PhysicsModule.dll" orig_path="PS4Mono\Media\Managed\UnityEngine.PhysicsModule.dll"/>
+    <file targ_path="Media/Managed/UnityEngine.PhysicsModule.dll.mdb" orig_path="PS4Mono\Media\Managed\UnityEngine.PhysicsModule.dll.mdb"/>
+    <file targ_path="Media/Managed/UnityEngine.ScreenCaptureModule.dll" orig_path="PS4Mono\Media\Managed\UnityEngine.ScreenCaptureModule.dll"/>
+    <file targ_path="Media/Managed/UnityEngine.ScreenCaptureModule.dll.mdb" orig_path="PS4Mono\Media\Managed\UnityEngine.ScreenCaptureModule.dll.mdb"/>
+    <file targ_path="Media/Managed/UnityEngine.SpatialTracking.dll" orig_path="PS4Mono\Media\Managed\UnityEngine.SpatialTracking.dll"/>
+    <file targ_path="Media/Managed/UnityEngine.SpriteMaskModule.dll" orig_path="PS4Mono\Media\Managed\UnityEngine.SpriteMaskModule.dll"/>
+    <file targ_path="Media/Managed/UnityEngine.SpriteMaskModule.dll.mdb" orig_path="PS4Mono\Media\Managed\UnityEngine.SpriteMaskModule.dll.mdb"/>
+    <file targ_path="Media/Managed/UnityEngine.StyleSheetsModule.dll" orig_path="PS4Mono\Media\Managed\UnityEngine.StyleSheetsModule.dll"/>
+    <file targ_path="Media/Managed/UnityEngine.StyleSheetsModule.dll.mdb" orig_path="PS4Mono\Media\Managed\UnityEngine.StyleSheetsModule.dll.mdb"/>
+    <file targ_path="Media/Managed/UnityEngine.TerrainModule.dll" orig_path="PS4Mono\Media\Managed\UnityEngine.TerrainModule.dll"/>
+    <file targ_path="Media/Managed/UnityEngine.TerrainModule.dll.mdb" orig_path="PS4Mono\Media\Managed\UnityEngine.TerrainModule.dll.mdb"/>
+    <file targ_path="Media/Managed/UnityEngine.TerrainPhysicsModule.dll" orig_path="PS4Mono\Media\Managed\UnityEngine.TerrainPhysicsModule.dll"/>
+    <file targ_path="Media/Managed/UnityEngine.TerrainPhysicsModule.dll.mdb" orig_path="PS4Mono\Media\Managed\UnityEngine.TerrainPhysicsModule.dll.mdb"/>
+    <file targ_path="Media/Managed/UnityEngine.TextRenderingModule.dll" orig_path="PS4Mono\Media\Managed\UnityEngine.TextRenderingModule.dll"/>
+    <file targ_path="Media/Managed/UnityEngine.TextRenderingModule.dll.mdb" orig_path="PS4Mono\Media\Managed\UnityEngine.TextRenderingModule.dll.mdb"/>
+    <file targ_path="Media/Managed/UnityEngine.TilemapModule.dll" orig_path="PS4Mono\Media\Managed\UnityEngine.TilemapModule.dll"/>
+    <file targ_path="Media/Managed/UnityEngine.TilemapModule.dll.mdb" orig_path="PS4Mono\Media\Managed\UnityEngine.TilemapModule.dll.mdb"/>
+    <file targ_path="Media/Managed/UnityEngine.Timeline.dll" orig_path="PS4Mono\Media\Managed\UnityEngine.Timeline.dll"/>
+    <file targ_path="Media/Managed/UnityEngine.UI.dll" orig_path="PS4Mono\Media\Managed\UnityEngine.UI.dll"/>
+    <file targ_path="Media/Managed/UnityEngine.UIElementsModule.dll" orig_path="PS4Mono\Media\Managed\UnityEngine.UIElementsModule.dll"/>
+    <file targ_path="Media/Managed/UnityEngine.UIElementsModule.dll.mdb" orig_path="PS4Mono\Media\Managed\UnityEngine.UIElementsModule.dll.mdb"/>
+    <file targ_path="Media/Managed/UnityEngine.UIModule.dll" orig_path="PS4Mono\Media\Managed\UnityEngine.UIModule.dll"/>
+    <file targ_path="Media/Managed/UnityEngine.UIModule.dll.mdb" orig_path="PS4Mono\Media\Managed\UnityEngine.UIModule.dll.mdb"/>
+    <file targ_path="Media/Managed/UnityEngine.UNETModule.dll" orig_path="PS4Mono\Media\Managed\UnityEngine.UNETModule.dll"/>
+    <file targ_path="Media/Managed/UnityEngine.UNETModule.dll.mdb" orig_path="PS4Mono\Media\Managed\UnityEngine.UNETModule.dll.mdb"/>
+    <file targ_path="Media/Managed/UnityEngine.UnityAnalyticsModule.dll" orig_path="PS4Mono\Media\Managed\UnityEngine.UnityAnalyticsModule.dll"/>
+    <file targ_path="Media/Managed/UnityEngine.UnityAnalyticsModule.dll.mdb" orig_path="PS4Mono\Media\Managed\UnityEngine.UnityAnalyticsModule.dll.mdb"/>
+    <file targ_path="Media/Managed/UnityEngine.UnityConnectModule.dll" orig_path="PS4Mono\Media\Managed\UnityEngine.UnityConnectModule.dll"/>
+    <file targ_path="Media/Managed/UnityEngine.UnityConnectModule.dll.mdb" orig_path="PS4Mono\Media\Managed\UnityEngine.UnityConnectModule.dll.mdb"/>
+    <file targ_path="Media/Managed/UnityEngine.UnityWebRequestAudioModule.dll" orig_path="PS4Mono\Media\Managed\UnityEngine.UnityWebRequestAudioModule.dll"/>
+    <file targ_path="Media/Managed/UnityEngine.UnityWebRequestAudioModule.dll.mdb" orig_path="PS4Mono\Media\Managed\UnityEngine.UnityWebRequestAudioModule.dll.mdb"/>
+    <file targ_path="Media/Managed/UnityEngine.UnityWebRequestModule.dll" orig_path="PS4Mono\Media\Managed\UnityEngine.UnityWebRequestModule.dll"/>
+    <file targ_path="Media/Managed/UnityEngine.UnityWebRequestModule.dll.mdb" orig_path="PS4Mono\Media\Managed\UnityEngine.UnityWebRequestModule.dll.mdb"/>
+    <file targ_path="Media/Managed/UnityEngine.UnityWebRequestTextureModule.dll" orig_path="PS4Mono\Media\Managed\UnityEngine.UnityWebRequestTextureModule.dll"/>
+    <file targ_path="Media/Managed/UnityEngine.UnityWebRequestTextureModule.dll.mdb" orig_path="PS4Mono\Media\Managed\UnityEngine.UnityWebRequestTextureModule.dll.mdb"/>
+    <file targ_path="Media/Managed/UnityEngine.UnityWebRequestWWWModule.dll" orig_path="PS4Mono\Media\Managed\UnityEngine.UnityWebRequestWWWModule.dll"/>
+    <file targ_path="Media/Managed/UnityEngine.UnityWebRequestWWWModule.dll.mdb" orig_path="PS4Mono\Media\Managed\UnityEngine.UnityWebRequestWWWModule.dll.mdb"/>
+    <file targ_path="Media/Managed/UnityEngine.VehiclesModule.dll" orig_path="PS4Mono\Media\Managed\UnityEngine.VehiclesModule.dll"/>
+    <file targ_path="Media/Managed/UnityEngine.VehiclesModule.dll.mdb" orig_path="PS4Mono\Media\Managed\UnityEngine.VehiclesModule.dll.mdb"/>
+    <file targ_path="Media/Managed/UnityEngine.VideoModule.dll" orig_path="PS4Mono\Media\Managed\UnityEngine.VideoModule.dll"/>
+    <file targ_path="Media/Managed/UnityEngine.VideoModule.dll.mdb" orig_path="PS4Mono\Media\Managed\UnityEngine.VideoModule.dll.mdb"/>
+    <file targ_path="Media/Managed/UnityEngine.VRModule.dll" orig_path="PS4Mono\Media\Managed\UnityEngine.VRModule.dll"/>
+    <file targ_path="Media/Managed/UnityEngine.VRModule.dll.mdb" orig_path="PS4Mono\Media\Managed\UnityEngine.VRModule.dll.mdb"/>
+    <file targ_path="Media/Managed/UnityEngine.WebModule.dll" orig_path="PS4Mono\Media\Managed\UnityEngine.WebModule.dll"/>
+    <file targ_path="Media/Managed/UnityEngine.WebModule.dll.mdb" orig_path="PS4Mono\Media\Managed\UnityEngine.WebModule.dll.mdb"/>
+    <file targ_path="Media/Managed/UnityEngine.WindModule.dll" orig_path="PS4Mono\Media\Managed\UnityEngine.WindModule.dll"/>
+    <file targ_path="Media/Managed/UnityEngine.WindModule.dll.mdb" orig_path="PS4Mono\Media\Managed\UnityEngine.WindModule.dll.mdb"/>
+    <file targ_path="Media/Modules/mono-ps4.prx" orig_path="PS4Mono\Media\Modules\mono-ps4.prx"/>
+    <file targ_path="Media/Modules/MonoAssembliesPS4.prx" orig_path="PS4Mono\Media\Modules\MonoAssembliesPS4.prx"/>
+    <file targ_path="Media/Plugins/libSceNpTrophy.prx" orig_path="PS4Mono\Media\Plugins\libSceNpTrophy.prx"/>
+    <file targ_path="Media/Plugins/universal.prx" orig_path="PS4Mono\Media\Plugins\universal.prx"/>
+    <file targ_path="Media/sharedassets0.assets.resS" orig_path="PS4Mono\Media\sharedassets0.assets.resS"/>
+    <file targ_path="Media/sharedassets0.resource" orig_path="PS4Mono\Media\sharedassets0.resource"/>
+  </files>
+  <rootdir>
+    <dir targ_name="Media">
+      <dir targ_name="Managed">
+        <dir targ_name="mono">
+          <dir targ_name="2.0"/>
+        </dir>
+      </dir>
+      <dir targ_name="Modules"/>
+      <dir targ_name="Plugins"/>
+    </dir>
+    <dir targ_name="savedata">
+      <dir targ_name="persistentdata"/>
+    </dir>
+    <dir targ_name="sce_module"/>
+    <dir targ_name="sce_sys"/>
+  </rootdir>
+</psproject>
