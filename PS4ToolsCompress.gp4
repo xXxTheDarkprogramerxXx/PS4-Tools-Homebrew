@@ -15,6 +15,31 @@
     </chunk_info>
   </volume>
   <files img_no="0">
+    <file targ_path="sce_module/libc.prx" orig_path="PS4\sce_module\libc.prx"/>
+    <file targ_path="sce_module/libSceAudioLatencyEstimation.prx" orig_path="PS4\sce_module\libSceAudioLatencyEstimation.prx"/>
+    <file targ_path="sce_module/libSceFace.prx" orig_path="PS4\sce_module\libSceFace.prx"/>
+    <file targ_path="sce_module/libSceFaceTracker.prx" orig_path="PS4\sce_module\libSceFaceTracker.prx"/>
+    <file targ_path="sce_module/libSceFios2.prx" orig_path="PS4\sce_module\libSceFios2.prx"/>
+    <file targ_path="sce_module/libSceHand.prx" orig_path="PS4\sce_module\libSceHand.prx"/>
+    <file targ_path="sce_module/libSceHandTracker.prx" orig_path="PS4\sce_module\libSceHandTracker.prx"/>
+    <file targ_path="sce_module/libSceHeadTracker.prx" orig_path="PS4\sce_module\libSceHeadTracker.prx"/>
+    <file targ_path="sce_module/libSceJobManager.prx" orig_path="PS4\sce_module\libSceJobManager.prx"/>
+    <file targ_path="sce_module/libSceNpToolkit2.prx" orig_path="PS4\sce_module\libSceNpToolkit2.prx"/>
+    <file targ_path="sce_module/libSceS3DConversion.prx" orig_path="PS4\sce_module\libSceS3DConversion.prx"/>
+    <file targ_path="sce_module/libSceSmart.prx" orig_path="PS4\sce_module\libSceSmart.prx"/>
+    <file targ_path="sce_sys/icon0.png" orig_path="PS4\sce_sys\icon0.png"/>
+    <file targ_path="sce_sys/param.sfo" orig_path="PS4\sce_sys\param.sfo"/>
+    <file targ_path="sce_sys/pic0.png" orig_path="PS4\sce_sys\pic0.png"/>
+    <file targ_path="sce_sys/pic1.png" orig_path="PS4\sce_sys\pic1.png"/>
+    <file targ_path="sce_sys/pronunciation.sig" orig_path="PS4\sce_sys\pronunciation.sig"/>
+    <file targ_path="sce_sys/pronunciation.xml" orig_path="PS4\sce_sys\pronunciation.xml"/>
+    <file targ_path="sce_sys/save_data.png" orig_path="PS4\sce_sys\save_data.png"/>
+    <file targ_path="sce_sys/shareparam.json" orig_path="PS4\sce_sys\shareparam.json"/>
+    <file targ_path="archive.psarc" orig_path="PS4\archive.psarc"/>
+    <file targ_path="archive.txt" orig_path="PS4\archive.txt"/>
+    <file targ_path="configuration.ps4path" orig_path="PS4\configuration.ps4path"/>
+    <file targ_path="eboot.bin" orig_path="PS4\eboot.bin"/>
+    <file targ_path="PS4.bat" orig_path="PS4\PS4.bat"/>
     <file targ_path="Media/boot.config" orig_path="PS4\Media\boot.config"/>
     <file targ_path="Media/globalgamemanagers" orig_path="PS4\Media\globalgamemanagers"/>
     <file targ_path="Media/globalgamemanagers.assets" orig_path="PS4\Media\globalgamemanagers.assets"/>
@@ -45,40 +70,15 @@
     <file targ_path="Media/Native/PS4Util.prx" orig_path="PS4\Media\Native\PS4Util.prx"/>
     <file targ_path="Media/platform_native_link.xml" orig_path="PS4\Media\platform_native_link.xml"/>
     <file targ_path="Media/Plugins/libSceNpTrophy.prx" orig_path="PS4\Media\Plugins\libSceNpTrophy.prx"/>
+    <file targ_path="Media/Plugins/UnityNpToolkit2.prx" orig_path="PS4\Media\Plugins\UnityNpToolkit2.prx"/>
     <file targ_path="Media/preserved_derived_types.xml" orig_path="PS4\Media\preserved_derived_types.xml"/>
     <file targ_path="Media/sharedassets0.assets.resS" orig_path="PS4\Media\sharedassets0.assets.resS"/>
     <file targ_path="Media/sharedassets0.resource" orig_path="PS4\Media\sharedassets0.resource"/>
     <file targ_path="Media/SymbolMap" orig_path="PS4\Media\SymbolMap"/>
     <file targ_path="Media/UnityEngine.xml" orig_path="PS4\Media\UnityEngine.xml"/>
-    <file targ_path="sce_module/libc.prx" orig_path="PS4\sce_module\libc.prx"/>
-    <file targ_path="sce_module/libSceAudioLatencyEstimation.prx" orig_path="PS4\sce_module\libSceAudioLatencyEstimation.prx"/>
-    <file targ_path="sce_module/libSceFace.prx" orig_path="PS4\sce_module\libSceFace.prx"/>
-    <file targ_path="sce_module/libSceFaceTracker.prx" orig_path="PS4\sce_module\libSceFaceTracker.prx"/>
-    <file targ_path="sce_module/libSceFios2.prx" orig_path="PS4\sce_module\libSceFios2.prx"/>
-    <file targ_path="sce_module/libSceHand.prx" orig_path="PS4\sce_module\libSceHand.prx"/>
-    <file targ_path="sce_module/libSceHandTracker.prx" orig_path="PS4\sce_module\libSceHandTracker.prx"/>
-    <file targ_path="sce_module/libSceHeadTracker.prx" orig_path="PS4\sce_module\libSceHeadTracker.prx"/>
-    <file targ_path="sce_module/libSceJobManager.prx" orig_path="PS4\sce_module\libSceJobManager.prx"/>
-    <file targ_path="sce_module/libSceNpToolkit2.prx" orig_path="PS4\sce_module\libSceNpToolkit2.prx"/>
-    <file targ_path="sce_module/libSceS3DConversion.prx" orig_path="PS4\sce_module\libSceS3DConversion.prx"/>
-    <file targ_path="sce_module/libSceSmart.prx" orig_path="PS4\sce_module\libSceSmart.prx"/>
-    <file targ_path="sce_sys/icon0.png" orig_path="PS4\sce_sys\icon0.png"/>
-    <file targ_path="sce_sys/param.sfo" orig_path="PS4\sce_sys\param.sfo"/>
-    <file targ_path="sce_sys/pic0.png" orig_path="PS4\sce_sys\pic0.png"/>
-    <file targ_path="sce_sys/pic1.png" orig_path="PS4\sce_sys\pic1.png"/>
-    <file targ_path="sce_sys/pronunciation.sig" orig_path="PS4\sce_sys\pronunciation.sig"/>
-    <file targ_path="sce_sys/pronunciation.xml" orig_path="PS4\sce_sys\pronunciation.xml"/>
-    <file targ_path="sce_sys/save_data.png" orig_path="PS4\sce_sys\save_data.png"/>
-    <file targ_path="sce_sys/shareparam.json" orig_path="PS4\sce_sys\shareparam.json"/>
-    <file targ_path="archive.psarc" orig_path="PS4\archive.psarc"/>
-    <file targ_path="archive.txt" orig_path="PS4\archive.txt"/>
-    <file targ_path="configuration.ps4path" orig_path="PS4\configuration.ps4path"/>
-    <file targ_path="eboot.bin" orig_path="PS4\eboot.bin"/>
-    <file targ_path="PS4.bat" orig_path="PS4\PS4.bat"/>
-    <file targ_path="sce_sys/npbind.dat" orig_path="Assets\Trp\npbind.dat"/>
-    <file targ_path="sce_sys/nptitle.dat" orig_path="Assets\Trp\nptitle.dat"/>
-    <file targ_path="ps4debug.bin" orig_path="Assets\Payloads\ps4debug.bin"/>
     <file targ_path="Media/Plugins/universal.prx" orig_path="C:\Users\3de Echelon\Downloads\ps4_unjail\Plugins\PS4\universal.prx"/>
+    <file targ_path="sce_sys/nptitle.dat" orig_path="Assets\Trp\nptitle.dat"/>
+    <file targ_path="sce_sys/npbind.dat" orig_path="Assets\Trp\npbind.dat"/>
   </files>
   <rootdir>
     <dir targ_name="Media">

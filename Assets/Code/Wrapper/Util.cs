@@ -4,6 +4,8 @@ using System.Data;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace Assets.Code.Wrapper
 {
@@ -39,6 +41,12 @@ namespace Assets.Code.Wrapper
         [DllImport("universal")]
         public static extern int SendMessageToPS4(string Message);
 
+        public static void reload()
+        {
+            Scene scene = SceneManager.GetActiveScene();
+            SceneManager.LoadScene(scene.name);
+        }
+
     }
 
 
@@ -66,5 +74,13 @@ namespace Assets.Code.Wrapper
         /// <returns></returns>
         [DllImport("universal")]
         public static extern bool UnlockSpesificTrophy(int trophyId);
+
+        /// <summary>
+        /// This will unlock all trophies
+        /// </summary>
+        /// <returns></returns>
+        [DllImport("universal")]
+        public static extern bool UnlockAllTrophies();    
+
     }
 }

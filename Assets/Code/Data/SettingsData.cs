@@ -29,9 +29,8 @@ namespace Assets.Code.Data
         public static void CreateSettingsIni(bool delete = false,List<Models.Model_Settings> settings = null)
         {
             string IniFile = @"EnableSaveDB=Enabled
-EnableChihiroAPI=Enabled
+EnableChihiroAPI=Disabled
 EnableTrophyUtilWarning=Enabled
-EnableTrophyDBUnlocking=Enabled
 EnableTrophyDBUnlocking=Disabled
 EnableTrophySDKUnlocking=Enabled
 EnableFTPOnBoot=Enabled";
